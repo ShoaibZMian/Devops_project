@@ -1,0 +1,8 @@
+/** Shared styles */
+
+.main-container {
+  display: flex;       
+  min-height: 100vh;   
+  width: 100%;        
+  height: 100%;       
+}

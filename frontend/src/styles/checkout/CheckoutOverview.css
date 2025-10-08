@@ -1,0 +1,230 @@
+.cart_container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  
+  .cart_items {
+    margin-top: 12px;
+  }
+  
+  .cart_list {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    list-style-type: none;
+  }
+  
+  .cart_list > li:not(:last-child) {
+    border-bottom: 1px solid #050505;
+  }
+  
+  .cart_list_item {
+    display: flex;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .cart_list_item {
+      padding-top: 2.5rem;
+      padding-bottom: 5.5rem;
+    }
+  }
+  
+  .cart_list_image_container {
+    flex-shrink: 0;
+  }
+  
+  .cart_item_details_container {
+    position: relative;
+    margin-left: 1rem;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  @media (min-width: 640px) {
+    .cart_item_details_container {
+      margin-left: 1.5rem;
+    }
+  }
+  
+  .card_item_grid_container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  @media (min-width: 640px) {
+    .card_item_grid_container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  .product_name {
+    font-size: 1.125rem;
+    font-weight: bold;
+    letter-spacing: -0.025em;
+  }
+  
+  .cart__item_modify_container {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  @media (min-width: 640px) {
+    .cart__item_modify_container {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      margin-top: 0;
+      display: block;
+      transform: translateX(-50%);
+    }
+  }
+  
+  .cart_item_column {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .item__details,
+  .item__gift_wrap,
+  .item__price,
+  .remove_button {
+    flex: 1;
+    padding: 0 10px;
+  }
+  
+  input[type="number"],
+  input[type="checkbox"] {
+    width: auto;
+    margin: 0 5px;
+  }
+  
+  .header_row .cart_item_column {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .header__detail {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .cart_item_column {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .cart_total {
+    font-size: 24px;
+    margin-top: 5rem;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+  }
+  
+  .rebateNudge {
+    color: darkred;
+    margin-top: 10px;
+  }
+  
+  
+  /*addrees form*/
+  .form-address-card {
+    width: 60%;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #0e0d0d;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+  }
+  
+  .form-address-card-header {
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: -0.025em;
+    background-color: #f8f9fa;
+  }
+  
+  .form-card {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 5px;
+    border: none;
+    background-color: #f8f9fa;
+  
+  }
+  @media (max-width: 600px) {
+    .form-card {
+      width: 90%;
+      
+    }
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #0e0d0d;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+  }
+  .form-input-code {
+    width: 53px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #0e0d0d;
+  background-color: #f8f9fa;
+  }
+  .form-input-phone {
+    width: 92%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #0e0d0d;
+    background-color: #f8f9fa;
+    
+  }
+  
+  .form-input-two {
+    width:  50% ;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #0e0d0d;
+    background-color: #f8f9fa;
+  }
+  .address-country{
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border:none;
+  
+  }
+  .payment-button {
+    width: 100%;
+    margin: 20px;
+    padding: 10px 20px;
+    background-color: #2a9d8f;
+    color: white;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .payment-button:hover {
+    background-color: #21867a;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+  }

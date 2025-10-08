@@ -1,0 +1,134 @@
+.admin-container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-container h1 {
+    text-align: center;
+    color: #333;
+}
+
+.userInformation, .productinformation, .createProduct, .updateProduct {
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 1px solid #0e0e0e;
+    border-radius: 5px;
+}
+
+.userInformation h3, .productinformation h3 {
+    color: #213cea;
+    margin-bottom: 10px;
+}
+
+.userInformation h4, .productinformation h4, .createProduct h4, .updateProduct h4 {
+    color: #129a00;
+    margin-bottom: 10px;
+}
+
+.userInformation p, .productinformation p {
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.userInformation input, .productinformation input, .createProduct input, .updateProduct input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #0e0e0e;
+    border-radius: 5px;
+}
+
+.userInformation button, .productinformation button, .createProduct button, .updateProduct button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.userInformation button:hover, .productinformation button:hover, .createProduct button:hover, .updateProduct button:hover {
+    background-color: #0056b3;
+}
+
+.categories {
+    width: 100%;
+    margin: auto;
+    padding: 20px;
+}
+
+.categories .category {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #0e0e0e;
+    border-radius: 5px;
+}
+
+.categories .createCategory, .categories .createSubCategory {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #0e0e0e;
+    border-radius: 5px;
+}
+
+.categories .createCategory h4, .categories .createSubCategory h4 {
+    color: #129a00;
+    margin-bottom: 10px;
+}
+
+.categories .createCategory input, .categories .createSubCategory input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #0e0e0e;
+    border-radius: 5px;
+}
+
+.categories .createCategory button, .categories .createSubCategory button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.categories .createCategory button:hover, .categories .createSubCategory button:hover {
+    background-color: #0056b3;
+}
+
+.deleteProduct {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #0e0e0e;
+    border-radius: 5px;
+}
+
+.deleteProduct h4 {
+    color: #d9534f;
+    margin-bottom: 10px;
+}
+
+.deleteProduct input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #0e0e0e;
+    border-radius: 5px;
+}
+
+.deleteProduct  {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #d9534f;
+    color: #fff;
+    cursor: pointer;
+}
+
+.deleteProduct button:hover {
+    background-color: #c9302c;
+}
