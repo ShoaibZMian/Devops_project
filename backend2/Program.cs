@@ -124,9 +124,16 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Automatically run migrations and seed data on startup
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+
+    // Run migrations to create/update database schema
+    var context = services.GetRequiredService<ApplicationDB_Context>();
+    context.Database.Migrate();
+
+    // Seed initial data
     var dataSeeder = services.GetRequiredService<DataSeeder>();
     dataSeeder.SeedData().Wait();
 }

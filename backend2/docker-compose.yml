@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend2
+    ports:
+      - "8080:80"
+    environment:
+      # Load environment variables from .env file
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
+      - JWT__Issuer=${JWT__Issuer}
+      - JWT__Audience=${JWT__Audience}
+      - JWT__OnlineStoreGroupe24=${JWT__OnlineStoreGroupe24}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - ASPNETCORE_URLS=http://+:80
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
