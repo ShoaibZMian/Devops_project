@@ -24,23 +24,29 @@ const ErrorState = {
 const SignupView = () => {
     const [formValues, setFormValues] = useState(FormState);
     const [formErrors, setFormErrors] = useState(ErrorState);
+    const [signupError, setSignupError] = useState('');
     const navigate = useNavigate();
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormValues({ ...formValues, [e.target.name]: e.target.value });
     };
 
     const handleSignUp = async () => {
-        setFormErrors(ErrorState);
-
         const { name, lastName, userName, email, password } = formValues;
 
-        if (!name) setFormErrors(errors => ({ ...errors, nameError: 'Name is required' }));
-        if (!lastName) setFormErrors(errors => ({ ...errors, lastNameError: 'Last Name is required' }));
-        if (!userName) setFormErrors(errors => ({ ...errors, userNameError: 'User Name is required' }));
-        if (!email) setFormErrors(errors => ({ ...errors, emailError: 'Email is required' }));
-        if (!password) setFormErrors(errors => ({ ...errors, passwordError: 'Password is required' }));
+        // Validate before submitting
+        const errors = { ...ErrorState };
+        if (!name) errors.nameError = 'Name is required';
+        if (!lastName) errors.lastNameError = 'Last Name is required';
+        if (!userName) errors.userNameError = 'User Name is required';
+        if (!email) errors.emailError = 'Email is required';
+        if (!password) errors.passwordError = 'Password is required';
 
-        if (Object.values(formErrors).some(error => error)) return;
+        setFormErrors(errors);
+
+        // Check if there are any errors
+        if (Object.values(errors).some(error => error)) return;
+
+        setSignupError('');
 
         const userData = {
             FirstName: name,
@@ -50,21 +56,34 @@ const SignupView = () => {
             Password: password,
         };
 
-        axios.post('/api/Account/register', userData)
-            .then((response) => {
-                console.log(response.data);
-                window.alert(`User ${name}!\n has been registered successfully!`);
-                setFormValues(FormState);
-                navigate('/Login');
-            })
-            .catch((error) => {
-                console.error(error);
-                if (error.response && error.response.status === 400) {
-                    window.alert('The email is already registered.');
+        try {
+            const response = await axios.post('/api/Account/register', userData);
+            console.log(response.data);
+            window.alert(`User ${name}!\n has been registered successfully!`);
+            setFormValues(FormState);
+            navigate('/Login');
+        } catch (error: any) {
+            console.error(error);
+            if (error.response) {
+                if (error.response.status === 400) {
+                    // Check if it's ModelState errors
+                    if (error.response.data.errors) {
+                        const errorMessages = Object.values(error.response.data.errors).flat().join(', ');
+                        setSignupError(errorMessages as string);
+                    } else if (typeof error.response.data === 'string') {
+                        setSignupError(error.response.data);
+                    } else {
+                        setSignupError('Invalid input. Please check your information.');
+                    }
+                } else if (error.response.status === 500) {
+                    setSignupError('Server error. The email or username may already be registered.');
                 } else {
-                    window.alert('An unexpected error occurred. Please try again later.');
+                    setSignupError('An unexpected error occurred. Please try again later.');
                 }
-            });
+            } else {
+                setSignupError('Unable to connect to server. Please try again later.');
+            }
+        }
     };
 
     return (
@@ -125,6 +144,7 @@ const SignupView = () => {
                     />
                     {formErrors.passwordError && <p className='error-message'>{formErrors.passwordError}</p>}
                 </div>
+                {signupError && <p className='error-message' style={{color: 'red', fontWeight: 'bold'}}>{signupError}</p>}
                 <label>
                     Already have an account? <a href='/Login'>Log in</a>
                 </label>

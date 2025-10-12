@@ -9,7 +9,7 @@ namespace backend2.Data.Data_transfer_object.AccountDto
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         [Required]
-        public string? Username { get; set; }
+        public string? UserName { get; set; }
         [Required]
         [EmailAddress]
         public string? Email { get; set; }

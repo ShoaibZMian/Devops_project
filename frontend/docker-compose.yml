@@ -15,7 +15,10 @@ services:
     restart: unless-stopped
     networks:
       - frontend-network
+      - devops-network
 
 networks:
   frontend-network:
     driver: bridge
+  devops-network:
+    external: true

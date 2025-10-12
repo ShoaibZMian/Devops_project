@@ -36,7 +36,7 @@ namespace backend2.Controller.API_EndPoints_Controller
                 {
                     FirstName = registerDto.FirstName,
                     LastName = registerDto.LastName,
-                    UserName = registerDto.Username,
+                    UserName = registerDto.UserName,
                     Email = registerDto.Email
                 };
 
