@@ -95,9 +95,7 @@ namespace backend2.Controller.API_EndPoints_Controller
                 {
                     UserName = user.UserName,
                     Email = user.Email,
-                    Token =   _jwtTokenService.GenerateJwtToken(user),
-                     
-                    
+                    token = await _jwtTokenService.GenerateJwtToken(user)
                 }
             );
         }

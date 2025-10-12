@@ -16,6 +16,7 @@ const LoginView = () => {
         userNameError: '',
         passwordError: '',
     });
+    const [loginError, setLoginError] = useState('');
 
     const navigate = useNavigate();
 
@@ -42,25 +43,37 @@ const LoginView = () => {
             return;
         }
 
+        setLoginError('');
+
         const userData = {
             UserName: formValues.userName,
             Password: formValues.password,
         };
 
-        axios.post('/api/Account/login', userData)
-        
-            .then((response) => {
-                console.log(response);
-                localStorage.setItem('token', response.data.token);
-            })
-            .catch((error) => {
-                console.log(error);
+        try {
+            const response = await axios.post('/api/Account/login', userData);
+            console.log(response);
+
+            // Store token in localStorage
+            localStorage.setItem('token', response.data.token);
+
+            // Navigate based on user data from backend
+            // You can check response.data for role information if needed
+            if (response.data.userName === 'admin') {
+                navigate('/dashboard');
+            } else {
+                navigate("/checkout/address");
             }
-        );
-        if (userData.UserName === 'admin' && userData.Password === 'Admin.store24') {
-            navigate('/dashboard');
-        } else {
-            navigate("/checkout/address");
+        } catch (error: any) {
+            console.log(error);
+            // Display error message to user
+            if (error.response?.data) {
+                setLoginError(typeof error.response.data === 'string'
+                    ? error.response.data
+                    : 'Login failed. Please check your credentials.');
+            } else {
+                setLoginError('Unable to connect to server. Please try again later.');
+            }
         }
     };
        
@@ -90,6 +103,7 @@ const LoginView = () => {
                     />
                     {formErrors.passwordError && <p className='error-message'>{formErrors.passwordError}</p>}
                 </div>
+                {loginError && <p className='error-message' style={{color: 'red', fontWeight: 'bold'}}>{loginError}</p>}
                 <div className='password-inputr'>
                     <label className='show-password-label'>Show Password</label>
                     <input
