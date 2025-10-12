@@ -25,7 +25,7 @@ interface Subcategory {
 interface Category {
   categoryId: number;
   name: string;
-  subcategory: Subcategory[];
+  subCategory: Subcategory[];
 }
 
 const HomeView = () => {
@@ -62,9 +62,9 @@ const HomeView = () => {
 
   const handleSubcategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const subCategoryId = parseInt(e.target.value);
-    const selectedCategory = categories.find(category => category.subcategory.some(subcategory => subcategory.subCategoryId === subCategoryId));
+    const selectedCategory = categories.find(category => category.subCategory.some(subcategory => subcategory.subCategoryId === subCategoryId));
     if (selectedCategory) {
-      const selectedSubcategory = selectedCategory.subcategory.find(subcategory => subcategory.subCategoryId === subCategoryId);
+      const selectedSubcategory = selectedCategory.subCategory.find(subcategory => subcategory.subCategoryId === subCategoryId);
       if (selectedSubcategory) {
         setProducts(selectedSubcategory.product);
         setSelectedSubcategory([selectedSubcategory]);
@@ -133,13 +133,13 @@ const HomeView = () => {
           <button type="submit">Search</button>
 
         </form>
-        {categories && categories.map(category => (
+        {Array.isArray(categories) && categories.map(category => (
           <div className="categories" key={category.categoryId}>
             <h2>{category.name}</h2>
-            {category.subcategory && category.subcategory.map(subcategory => (
+            {Array.isArray(category.subCategory) && category.subCategory.map(subcategory => (
               <div key={subcategory.subCategoryId}>
                 <h3>{subcategory.subCategoryName}</h3>
-                {subcategory.product && subcategory.product.map(product => (
+                {Array.isArray(subcategory.product) && subcategory.product.map(product => (
                   <div key={product.productId}>
                     <h4>{product.name}</h4>
                     <p>{product.price}</p>
@@ -153,7 +153,7 @@ const HomeView = () => {
       </div>
 
       <div className='flex '>
-        {fetchedProducts.length === 0 ? (
+        {!Array.isArray(fetchedProducts) || fetchedProducts.length === 0 ? (
           <div>Loading...</div>
         ) : (
           fetchedProducts.map((product, index) => (

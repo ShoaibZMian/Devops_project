@@ -115,7 +115,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Disabled HTTPS redirection for Docker HTTP deployment
+// app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");
 
