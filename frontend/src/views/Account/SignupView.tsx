@@ -2,6 +2,7 @@
 import httpService from "../../httpCommon";
 import "../../styles/account/Signup.css";
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const axios = httpService();
 
@@ -24,7 +25,6 @@ const ErrorState = {
 const SignupView = () => {
     const [formValues, setFormValues] = useState(FormState);
     const [formErrors, setFormErrors] = useState(ErrorState);
-    const [signupError, setSignupError] = useState('');
     const navigate = useNavigate();
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormValues({ ...formValues, [e.target.name]: e.target.value });
@@ -46,8 +46,6 @@ const SignupView = () => {
         // Check if there are any errors
         if (Object.values(errors).some(error => error)) return;
 
-        setSignupError('');
-
         const userData = {
             FirstName: name,
             LastName: lastName,
@@ -59,7 +57,7 @@ const SignupView = () => {
         try {
             const response = await axios.post('/api/Account/register', userData);
             console.log(response.data);
-            window.alert(`User ${name}!\n has been registered successfully!`);
+            toast.success(`User ${name} has been registered successfully!`);
             setFormValues(FormState);
             navigate('/Login');
         } catch (error: any) {
@@ -69,19 +67,28 @@ const SignupView = () => {
                     // Check if it's ModelState errors
                     if (error.response.data.errors) {
                         const errorMessages = Object.values(error.response.data.errors).flat().join(', ');
-                        setSignupError(errorMessages as string);
+                        toast.error(errorMessages as string);
                     } else if (typeof error.response.data === 'string') {
-                        setSignupError(error.response.data);
+                        toast.error(error.response.data);
                     } else {
-                        setSignupError('Invalid input. Please check your information.');
+                        toast.error('Invalid input. Please check your information.');
                     }
                 } else if (error.response.status === 500) {
-                    setSignupError('Server error. The email or username may already be registered.');
+                    // Check if it's an array of identity errors (password validation, etc.)
+                    if (Array.isArray(error.response.data)) {
+                        const errorMessages = error.response.data
+                            .map((err: any) => err.description || err.message)
+                            .filter((msg: string) => msg)
+                            .join(' ');
+                        toast.error(errorMessages || 'Registration failed. Please check your input.');
+                    } else {
+                        toast.error('Server error. The email or username may already be registered.');
+                    }
                 } else {
-                    setSignupError('An unexpected error occurred. Please try again later.');
+                    toast.error('An unexpected error occurred. Please try again later.');
                 }
             } else {
-                setSignupError('Unable to connect to server. Please try again later.');
+                toast.error('Unable to connect to server. Please try again later.');
             }
         }
     };
@@ -144,7 +151,6 @@ const SignupView = () => {
                     />
                     {formErrors.passwordError && <p className='error-message'>{formErrors.passwordError}</p>}
                 </div>
-                {signupError && <p className='error-message' style={{color: 'red', fontWeight: 'bold'}}>{signupError}</p>}
                 <label>
                     Already have an account? <a href='/Login'>Log in</a>
                 </label>

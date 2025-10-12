@@ -1,6 +1,7 @@
 ﻿import React, {useEffect, useState } from "react";
 import httpService from '../../httpCommon';
 import "../../styles/account/DashboardView.css";
+import { toast } from 'react-toastify';
 
 
 const axios = httpService();
@@ -130,7 +131,7 @@ const AdminDashboardView = () => {
                         const categoryData = response.data
                         setDeletedProduct(categoryData.name)
                         window.location.reload();
-                        window.alert("Category Deleted")
+                        toast.success("Category Deleted")
                     })
             } catch (error) {
                 console.error('Error:', error);
@@ -156,7 +157,7 @@ const AdminDashboardView = () => {
                         setProductCategory(categoryData.name)
                         
                         window.location.reload();
-                        window.alert("Category Created")
+                        toast.success("Category Created")
                     })
             } catch (error) {
                 console.error('Error:', error);
@@ -184,7 +185,7 @@ const AdminDashboardView = () => {
                         setSubCategory(subCategoryData.name)
                         
                         window.location.reload();
-                        window.alert("SubCategory Created")
+                        toast.success("SubCategory Created")
                     })
             } catch (error) {
                 console.error('Error:', error);
@@ -249,7 +250,7 @@ const AdminDashboardView = () => {
                         setUpsellProduct(productData.upsellProduct)
 
                         window.location.reload();
-                        window.alert("Product Created")
+                        toast.success("Product Created")
                     })
             } catch (error) {
                 console.error('Error:', error);
@@ -285,7 +286,7 @@ const AdminDashboardView = () => {
                         setUpsellProduct(productData.upsellProduct)
                         
                         window.location.reload();
-                        window.alert("Product Updated")
+                        toast.success("Product Updated")
                         
                     }
                     )
@@ -310,7 +311,7 @@ const deleteProduct = async (id: string) => {
                     const productData = response.data
                     setDeletedProduct(productData.name)
                     window.location.reload();
-                    window.alert("Product Deleted")
+                    toast.success("Product Deleted")
                 })
         } catch (error) {
             console.error('Error:', error);

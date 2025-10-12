@@ -2,6 +2,7 @@
 import httpService from '../../httpCommon';
 import "../../styles/account/Login.css";
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 const axios = httpService();
@@ -16,7 +17,6 @@ const LoginView = () => {
         userNameError: '',
         passwordError: '',
     });
-    const [loginError, setLoginError] = useState('');
 
     const navigate = useNavigate();
 
@@ -43,8 +43,6 @@ const LoginView = () => {
             return;
         }
 
-        setLoginError('');
-
         const userData = {
             UserName: formValues.userName,
             Password: formValues.password,
@@ -57,6 +55,8 @@ const LoginView = () => {
             // Store token in localStorage
             localStorage.setItem('token', response.data.token);
 
+            toast.success('Login successful!');
+
             // Navigate based on user data from backend
             // You can check response.data for role information if needed
             if (response.data.userName === 'admin') {
@@ -68,11 +68,11 @@ const LoginView = () => {
             console.log(error);
             // Display error message to user
             if (error.response?.data) {
-                setLoginError(typeof error.response.data === 'string'
+                toast.error(typeof error.response.data === 'string'
                     ? error.response.data
                     : 'Login failed. Please check your credentials.');
             } else {
-                setLoginError('Unable to connect to server. Please try again later.');
+                toast.error('Unable to connect to server. Please try again later.');
             }
         }
     };
@@ -103,7 +103,6 @@ const LoginView = () => {
                     />
                     {formErrors.passwordError && <p className='error-message'>{formErrors.passwordError}</p>}
                 </div>
-                {loginError && <p className='error-message' style={{color: 'red', fontWeight: 'bold'}}>{loginError}</p>}
                 <div className='password-inputr'>
                     <label className='show-password-label'>Show Password</label>
                     <input
