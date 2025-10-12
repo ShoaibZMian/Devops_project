@@ -27,9 +27,6 @@ const Navbar = () => {
         <a href="/login" className="nav-item">
           Login
         </a>
-        <a href="/signup" className="nav-item">
-          Signup
-        </a>
         <a href="/dashboard" className="nav-item">
           Dashboard
         </a>
