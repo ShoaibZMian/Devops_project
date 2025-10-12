@@ -55,7 +55,7 @@ namespace backend2.Controller.API_EndPoints_Controller
                             LastName = registerDto.LastName,
                             UserName = appUser.UserName,
                             Email = appUser.Email,
-                            Token = _jwtTokenService.GenerateJwtToken(appUser)
+                            token = await _jwtTokenService.GenerateJwtToken(appUser)
                         }
                     );
                 }
