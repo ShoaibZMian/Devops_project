@@ -3,6 +3,7 @@ import httpService from '../../httpCommon';
 import "../../styles/account/Login.css";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { isAdmin } from '../../utils/auth';
 
 
 const axios = httpService();
@@ -57,12 +58,11 @@ const LoginView = () => {
 
             toast.success('Login successful!');
 
-            // Navigate based on user data from backend
-            // You can check response.data for role information if needed
-            if (response.data.userName === 'admin') {
+            // Navigate based on user role from JWT token
+            if (isAdmin()) {
                 navigate('/dashboard');
             } else {
-                navigate("/checkout/address");
+                navigate("/");
             }
         } catch (error: any) {
             console.log(error);

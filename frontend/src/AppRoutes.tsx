@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import LoadingSpinner from "./components/loadingspinner/LoadingSpinner";
 import Layout from "./Layout/Layout";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 // We will be using lazy loading to only load the components that are needed
@@ -39,7 +40,14 @@ const AppRoutes = () => {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Layout>
       </Suspense>

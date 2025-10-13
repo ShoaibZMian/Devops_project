@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend2.Controller.API_EndPoints_Controller
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class AdminController  : ControllerBase
     {
         private readonly UserManager<User> _userManager;

@@ -1,12 +1,20 @@
 import NavbarLogo from "./NavbarLogo";
 import "../../styles/navbar/Navbar.css";
 import { useNavigate } from "react-router-dom";
+import { isAdmin, isAuthenticated, logout } from "../../utils/auth";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const authenticated = isAuthenticated();
+  const admin = isAdmin();
 
   const navigateToCheckout = () => {
     navigate("/checkout");
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
   return (
@@ -24,12 +32,21 @@ const Navbar = () => {
         <a href="/about" className="nav-item">
           About
         </a>
-        <a href="/login" className="nav-item">
-          Login
-        </a>
-        <a href="/dashboard" className="nav-item">
-          Dashboard
-        </a>
+        {!authenticated && (
+          <a href="/login" className="nav-item">
+            Login
+          </a>
+        )}
+        {authenticated && admin && (
+          <a href="/dashboard" className="nav-item">
+            Dashboard
+          </a>
+        )}
+        {authenticated && (
+          <button onClick={handleLogout} className="nav-item" style={{background: 'none', border: 'none', cursor: 'pointer'}}>
+            Logout
+          </button>
+        )}
       </div>
       <div className="nav-right">
         <button className="cart-button" onClick={navigateToCheckout}>

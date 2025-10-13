@@ -1,10 +1,7 @@
 ﻿import React, {useEffect, useState } from "react";
-import httpService from '../../httpCommon';
+import axios from '../../httpCommon';
 import "../../styles/account/DashboardView.css";
 import { toast } from 'react-toastify';
-
-
-const axios = httpService();
 
 interface Category {
     categoryId: string;
@@ -62,7 +59,7 @@ const AdminDashboardView = () => {
     
     useEffect(() => {
         // Fetch user data
-        axios.get('/userCount')
+        axios.get('/api/Admin/userCount')
             .then((response) => {
                 console.log('Response data:', response.data);
                 setUserCount(response.data);
@@ -72,7 +69,7 @@ const AdminDashboardView = () => {
             });
 
         // Fetch product data
-        axios.get('/productCount')
+        axios.get('/api/Admin/productCount')
             .then((response) => {
                 console.log('Product Data:', response.data);
                 setProductCount(response.data);
@@ -80,9 +77,9 @@ const AdminDashboardView = () => {
             .catch((error) => {
                 console.error('Error:', error);
             });
-        
-        
-            axios.get('api/Categories/GetCategories')
+
+
+            axios.get('/api/Categories/GetCategories')
                 .then((response) => {
                     console.log('Categories:', response.data);
                     setCategories(response.data);
@@ -324,7 +321,7 @@ const deleteProduct = async (id: string) => {
         console.log('Token:', token);
         if (id && token) {
             try {
-                axios.get(`/getUser/${id}`, {
+                axios.get(`/api/Admin/getUser/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

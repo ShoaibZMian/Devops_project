@@ -63,6 +63,9 @@ Run both frontend and backend with a single command:
 
 # Start with fresh builds
 ./run-all.sh --build
+cd /home/shweb/Documents/Dev/Devops_project && ./run-all.sh --build 
+cd /home/shweb/Documents/Dev/Devops_project/frontend && docker compose   timeout: 5m 
+      build --no-cache
 
 # Stop all services
 ./run-all.sh --down

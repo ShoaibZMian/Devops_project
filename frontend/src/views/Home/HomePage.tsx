@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import httpService from "../../httpCommon";
+import axios from "../../httpCommon";
 
 import '../../styles/home/Home.css';
 // import ProductCard from "../../components/card/ProductCard";
@@ -29,8 +29,6 @@ interface Category {
 }
 
 const HomeView = () => {
-
-  const axios = httpService()
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
   const [productName, setProductName] = useState('');
   const [category, setCategory] = useState('');

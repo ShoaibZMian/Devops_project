@@ -45,7 +45,11 @@ namespace backend2.Controller.API_EndPoints_Controller
 
                 if (createdUser.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(appUser, "User");
+                    // Check if this is the first user - make them admin, otherwise regular user
+                    var userCount = await _userManager.Users.CountAsync();
+                    var role = userCount == 1 ? "Admin" : "User"; // Count is 1 because we just created the user
+
+                    var roleResult = await _userManager.AddToRoleAsync(appUser, role);
                     if (roleResult.Succeeded)
                     {
                         return Ok(
