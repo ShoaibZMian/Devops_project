@@ -71,6 +71,7 @@ namespace backend2.Controller.Repository
         public async Task<IEnumerable<Product>> GetAllProductsAsync(ProductQueryObjects productQuery)
         {
             var products = _context.Products
+            .Include(c => c.Category)
             // .Include(c => c.ProductReviews)
             // .Include(c => c.WishLists)
             // .Include(c => c.ProductImages)
@@ -85,7 +86,7 @@ namespace backend2.Controller.Repository
             if (!string.IsNullOrWhiteSpace(productQuery.Category))
             {
                 // Assuming you have a navigation property to the Category entity in your Product model
-                products = products.Where(p => p.Category.Name.Contains(productQuery.Category));
+                products = products.Where(p => p.Category != null && p.Category.Name.Contains(productQuery.Category));
             }
 
             if (productQuery.MinPrice.HasValue)
