@@ -1,0 +1,219 @@
+name: Build and Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  # DockerHub Configuration
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/frontend
+  BACKEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/backend2
+
+  # Azure Configuration
+  AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
+  VNET_NAME: devops-vnet
+  SUBNET_NAME: container-subnet
+
+  # Container Names
+  FRONTEND_CONTAINER: frontend
+  BACKEND_CONTAINER: backend2
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend2
+          file: ./backend2/Dockerfile
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
+
+  deploy-to-azure:
+    name: Deploy to Azure Container Instances
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create or Update Virtual Network
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            # Create VNet if it doesn't exist
+            az network vnet show \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --name ${{ env.VNET_NAME }} \
+              || az network vnet create \
+                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                --name ${{ env.VNET_NAME }} \
+                --address-prefix 10.0.0.0/16 \
+                --location ${{ env.AZURE_LOCATION }}
+
+            # Create subnet for containers if it doesn't exist
+            az network vnet subnet show \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --vnet-name ${{ env.VNET_NAME }} \
+              --name ${{ env.SUBNET_NAME }} \
+              || az network vnet subnet create \
+                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                --vnet-name ${{ env.VNET_NAME }} \
+                --name ${{ env.SUBNET_NAME }} \
+                --address-prefixes 10.0.1.0/24 \
+                --delegations Microsoft.ContainerInstance/containerGroups
+
+      - name: Get Subnet ID
+        id: subnet
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            SUBNET_ID=$(az network vnet subnet show \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --vnet-name ${{ env.VNET_NAME }} \
+              --name ${{ env.SUBNET_NAME }} \
+              --query id -o tsv)
+            echo "subnet_id=$SUBNET_ID" >> $GITHUB_OUTPUT
+
+      - name: Deploy Backend Container
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az container create \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --name ${{ env.BACKEND_CONTAINER }} \
+              --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
+              --cpu 1 \
+              --memory 1.5 \
+              --registry-login-server docker.io \
+              --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
+              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+              --dns-name-label ${{ env.BACKEND_CONTAINER }}-${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --ports 80 \
+              --subnet ${{ steps.subnet.outputs.subnet_id }} \
+              --location ${{ env.AZURE_LOCATION }} \
+              --environment-variables \
+                ConnectionStrings__DefaultConnection="${{ secrets.DB_CONNECTION_STRING }}" \
+                JWT__Issuer="${{ secrets.JWT_ISSUER }}" \
+                JWT__Audience="${{ secrets.JWT_AUDIENCE }}" \
+                JWT__OnlineStoreGroupe24="${{ secrets.JWT_SECRET }}" \
+                ASPNETCORE_ENVIRONMENT="Production" \
+                ASPNETCORE_URLS="http://+:80" \
+              --restart-policy Always
+
+      - name: Get Backend FQDN
+        id: backend
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            BACKEND_FQDN=$(az container show \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --name ${{ env.BACKEND_CONTAINER }} \
+              --query ipAddress.fqdn -o tsv)
+            echo "fqdn=$BACKEND_FQDN" >> $GITHUB_OUTPUT
+            echo "Backend FQDN: $BACKEND_FQDN"
+
+      - name: Deploy Frontend Container
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az container create \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --name ${{ env.FRONTEND_CONTAINER }} \
+              --image ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
+              --cpu 1 \
+              --memory 1 \
+              --registry-login-server docker.io \
+              --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
+              --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+              --dns-name-label ${{ env.FRONTEND_CONTAINER }}-${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --ports 80 \
+              --subnet ${{ steps.subnet.outputs.subnet_id }} \
+              --location ${{ env.AZURE_LOCATION }} \
+              --environment-variables \
+                NODE_ENV="production" \
+                REACT_APP_HOST_IP_ADDRESS="http://${{ steps.backend.outputs.fqdn }}" \
+              --restart-policy Always
+
+      - name: Get Frontend FQDN
+        id: frontend
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            FRONTEND_FQDN=$(az container show \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --name ${{ env.FRONTEND_CONTAINER }} \
+              --query ipAddress.fqdn -o tsv)
+            echo "fqdn=$FRONTEND_FQDN" >> $GITHUB_OUTPUT
+            echo "Frontend FQDN: $FRONTEND_FQDN"
+
+      - name: Display Deployment URLs
+        run: |
+          echo "========================================="
+          echo "Deployment Successful!"
+          echo "========================================="
+          echo "Frontend URL: http://${{ steps.frontend.outputs.fqdn }}"
+          echo "Backend URL: http://${{ steps.backend.outputs.fqdn }}"
+          echo "Backend Swagger: http://${{ steps.backend.outputs.fqdn }}/swagger"
+          echo "========================================="
+
+      - name: Verify Container Health
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            echo "Checking Backend container status..."
+            az container show \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --name ${{ env.BACKEND_CONTAINER }} \
+              --query instanceView.state -o tsv
+
+            echo "Checking Frontend container status..."
+            az container show \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --name ${{ env.FRONTEND_CONTAINER }} \
+              --query instanceView.state -o tsv
+
+      - name: Azure Logout
+        if: always()
+        run: az logout
