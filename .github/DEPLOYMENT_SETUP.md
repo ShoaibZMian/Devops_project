@@ -29,7 +29,7 @@ Add the following secrets:
 | `AZURE_CREDENTIALS` | Service principal JSON | See instructions below |
 | `AZURE_SUBSCRIPTION_ID` | Your Azure subscription ID | Find in Azure Portal → Subscriptions |
 | `AZURE_RESOURCE_GROUP` | Resource group name | Choose existing or create new |
-| `AZURE_LOCATION` | Azure region | e.g., `eastus`, `westus2` |
+| `AZURE_LOCATION` | Azure region | e.g., `northeurope`, `westus2` |
 
 ### Application Configuration
 
@@ -85,7 +85,7 @@ If you don't have a resource group yet:
 ```bash
 az group create \
   --name your-resource-group-name \
-  --location eastus
+  --location northeurope
 ```
 
 ## Workflow Triggers
