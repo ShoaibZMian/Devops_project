@@ -130,7 +130,7 @@ jobs:
               --cpu 1 \
               --memory 1.5 \
               --os-type Linux \
-              --registry-login-server docker.io \
+              --registry-login-server index.docker.io \
               --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
               --dns-name-label ${{ env.BACKEND_CONTAINER }}-${{ env.DNS_LABEL_SUFFIX }} \
@@ -168,7 +168,7 @@ jobs:
               --cpu 1 \
               --memory 1 \
               --os-type Linux \
-              --registry-login-server docker.io \
+              --registry-login-server index.docker.io \
               --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
               --dns-name-label ${{ env.FRONTEND_CONTAINER }}-${{ env.DNS_LABEL_SUFFIX }} \
