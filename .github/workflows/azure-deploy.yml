@@ -22,6 +22,9 @@ env:
   FRONTEND_CONTAINER: frontend
   BACKEND_CONTAINER: backend2
 
+  # DNS Label (lowercase, no underscores, max 63 chars)
+  DNS_LABEL_SUFFIX: devops-project
+
 jobs:
   build-and-push:
     name: Build and Push Docker Images
@@ -130,7 +133,7 @@ jobs:
               --registry-login-server docker.io \
               --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
-              --dns-name-label ${{ env.BACKEND_CONTAINER }}-${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --dns-name-label ${{ env.BACKEND_CONTAINER }}-${{ env.DNS_LABEL_SUFFIX }} \
               --ports 80 \
               --location ${{ env.AZURE_LOCATION }} \
               --environment-variables \
@@ -168,7 +171,7 @@ jobs:
               --registry-login-server docker.io \
               --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
-              --dns-name-label ${{ env.FRONTEND_CONTAINER }}-${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --dns-name-label ${{ env.FRONTEND_CONTAINER }}-${{ env.DNS_LABEL_SUFFIX }} \
               --ports 80 \
               --location ${{ env.AZURE_LOCATION }} \
               --environment-variables \
