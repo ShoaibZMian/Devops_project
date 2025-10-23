@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../styles/checkout/Payment.css";
 import { Address } from "../Checkout/AddressForm";
 import LoadingSpinner from "../../components/loadingspinner/LoadingSpinner";
-import httpService from "../../httpCommon";
-
-const axios = httpService()
+import axios from "../../httpCommon";
 interface IPaymentDetails {
   giftCard: boolean;
   mobilePay: boolean;

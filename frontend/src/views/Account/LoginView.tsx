@@ -1,12 +1,9 @@
 ﻿import React, { useState, useEffect } from 'react';
-import httpService from '../../httpCommon';
+import axios from '../../httpCommon';
 import "../../styles/account/Login.css";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { isAdmin } from '../../utils/auth';
-
-
-const axios = httpService();
 
 const LoginView = () => {
     const [formValues, setFormValues] = useState({

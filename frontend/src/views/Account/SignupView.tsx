@@ -1,10 +1,8 @@
 ﻿import React, { useState } from 'react';
-import httpService from "../../httpCommon";
+import axios from "../../httpCommon";
 import "../../styles/account/Signup.css";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
-const axios = httpService();
 
 const FormState = {
     name: '',
