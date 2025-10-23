@@ -1,6 +1,7 @@
 ﻿import axios from "axios";
 
-const ip = process.env.REACT_APP_HOST_IP_ADDRESS;
+// Use runtime config from env-config.js if available, otherwise fall back to build-time env var
+const ip = (window._env_ && window._env_.REACT_APP_HOST_IP_ADDRESS) || process.env.REACT_APP_HOST_IP_ADDRESS;
 
 const defaultOptions = {
     headers: {
@@ -15,6 +16,7 @@ if (ip && ip.trim() !== '') {
     defaultOptions.baseURL = ip;
 }
 
+console.log('Backend URL:', ip);
 console.log('You are connected to the backend server');
 
 // Create a single axios instance
