@@ -131,7 +131,6 @@ jobs:
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
               --dns-name-label ${{ env.BACKEND_CONTAINER }}-${{ secrets.AZURE_RESOURCE_GROUP }} \
               --ports 80 \
-              --subnet ${{ steps.subnet.outputs.subnet_id }} \
               --location ${{ env.AZURE_LOCATION }} \
               --environment-variables \
                 ConnectionStrings__DefaultConnection="${{ secrets.DB_CONNECTION_STRING }}" \
@@ -169,7 +168,6 @@ jobs:
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
               --dns-name-label ${{ env.FRONTEND_CONTAINER }}-${{ secrets.AZURE_RESOURCE_GROUP }} \
               --ports 80 \
-              --subnet ${{ steps.subnet.outputs.subnet_id }} \
               --location ${{ env.AZURE_LOCATION }} \
               --environment-variables \
                 NODE_ENV="production" \
