@@ -126,6 +126,7 @@ jobs:
               --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
               --cpu 1 \
               --memory 1.5 \
+              --os-type Linux \
               --registry-login-server docker.io \
               --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
@@ -163,6 +164,7 @@ jobs:
               --image ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
               --cpu 1 \
               --memory 1 \
+              --os-type Linux \
               --registry-login-server docker.io \
               --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
               --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
