@@ -1,0 +1,22 @@
+{
+  "name": "devops_project",
+  "version": "1.0.0",
+  "description": "A full-stack e-commerce application built with React TypeScript frontend and ASP.NET Core backend, containerized with Docker and deployed to Azure Container Instances with automated CI/CD.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShoaibZMian/Devops_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ShoaibZMian/Devops_project/issues"
+  },
+  "homepage": "https://github.com/ShoaibZMian/Devops_project#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^24.10.1"
+  }
+}

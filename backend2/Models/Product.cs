@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using backend2.Models.Enum;
 
@@ -5,7 +6,8 @@ namespace backend2.Models;
 
 public class Product
 {
-    public string? ProductId { get; set; }
+    [Key]
+    public string ProductId { get; set; } = Guid.NewGuid().ToString();
     public string? Name { get; set; }
 
     [Column(TypeName = "decimal(18,2)")] public decimal Price { get; set; }
@@ -15,7 +17,6 @@ public class Product
     public int RebatePercent { get; set; }
     public string? UpsellProductId { get; set; }
 
-    [NotMapped] // TODO: Remove [NotMapped] after adding ImageUrl column to Azure database
     public string? ImageUrl { get; set; }
     public string? FileName { get; set; }
     public string? ContentType { get; set; }

@@ -72,7 +72,7 @@ namespace backend2.Controllers
 
         // [Authorize(Roles = "Admin")]
         [HttpPost("CreateProduct")]
-        public async Task<ActionResult<ProductDto>> CreateProduct(  [FromForm] Post_ProductDto productDto)
+        public async Task<ActionResult<ProductDto>> CreateProduct( Post_ProductDto productDto)
         {
             if (!ModelState.IsValid)
             {

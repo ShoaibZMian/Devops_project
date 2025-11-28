@@ -146,18 +146,6 @@ const HomeView = () => {
             Search
           </button>
         </form>
-
-        {/* Categories */}
-        {Array.isArray(categories) && categories.map(category => (
-          <div key={category.categoryId} className="mb-4">
-            <h2 className="text-lg font-semibold mb-2">{category.name}</h2>
-            {Array.isArray(category.subCategory) && category.subCategory.map(subcategory => (
-              <div key={subcategory.subCategoryId} className="ml-4 mb-2">
-                <h3 className="text-md font-medium text-muted-foreground">{subcategory.subCategoryName}</h3>
-              </div>
-            ))}
-          </div>
-        ))}
       </div>
 
       {/* Products Grid */}
@@ -171,11 +159,11 @@ const HomeView = () => {
               className="bg-card border rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
             >
               {product.imageUrl && (
-                <div className="w-full h-48 overflow-hidden bg-muted">
+                <div className="w-full h-48 overflow-hidden bg-white flex items-center justify-center">
                   <img
                     src={product.imageUrl}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="max-w-full max-h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}

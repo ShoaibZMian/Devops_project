@@ -230,13 +230,14 @@ const AdminDashboardView = () => {
         try {
             const response = await axios.post('api/Products/CreateProduct', {
                 Name: Name,
-                Price: Price,
-                RebateQuantity: rebateQuantity,
-                RebatePercent: rebatePercent,
-                UpsellProductId: upsellProduct,
-                ImageUrl: imageUrl,
-                SubcategoryId: subcategoryId,
-                CategoryId: categoryId,
+                Price: parseFloat(Price) || 0,
+                Currency: currency || "DKK",
+                RebateQuantity: parseInt(rebateQuantity) || 0,
+                RebatePercent: parseInt(rebatePercent) || 0,
+                UpsellProductId: upsellProduct || null,
+                ImageUrl: imageUrl || null,
+                SubcategoryId: parseInt(subcategoryId) || 0,
+                CategoryId: parseInt(categoryId) || 0,
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -524,19 +525,53 @@ const uploadImage = async (productId: string) => {
 
             <div className="categories">
                 <h4>Category Information</h4>
-                <select
-                    className="category"
-                    onChange={(e) => setSelectedCategory(categories.find(category => category.categoryId === e.target.value) || null)}>
-                    <option value="">Categories</option>
-                    {categories.map((category) => (
-                        <option key={category.categoryId} value={category.categoryId}>
-                            {`${category.categoryId} ${category.name}`}
-                        </option>
 
+                {/* Category & Subcategory ID Reference */}
+                <div style={{
+                    backgroundColor: '#f5f5f5',
+                    padding: '15px',
+                    borderRadius: '8px',
+                    marginBottom: '20px',
+                    border: '1px solid #ddd'
+                }}>
+                    <h5 style={{ marginTop: '0', marginBottom: '10px', color: '#333' }}>
+                        Category & Subcategory IDs (for creating products):
+                    </h5>
+                    {categories.map((category) => (
+                        <div key={category.categoryId} style={{ marginBottom: '15px' }}>
+                            <div style={{
+                                fontWeight: 'bold',
+                                fontSize: '14px',
+                                color: '#2196F3',
+                                marginBottom: '5px'
+                            }}>
+                                Category ID {category.categoryId}: {category.name}
+                            </div>
+                            {category.subCategory && category.subCategory.length > 0 ? (
+                                <div style={{ paddingLeft: '20px' }}>
+                                    {category.subCategory.map((sub) => (
+                                        <div key={sub.subCategoryId} style={{
+                                            fontSize: '13px',
+                                            color: '#666',
+                                            marginBottom: '3px'
+                                        }}>
+                                            └─ Subcategory ID {sub.subCategoryId}: {sub.subCategoryName}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div style={{
+                                    paddingLeft: '20px',
+                                    fontSize: '12px',
+                                    color: '#999',
+                                    fontStyle: 'italic'
+                                }}>
+                                    No subcategories
+                                </div>
+                            )}
+                        </div>
                     ))}
-                </select>
-                <button onClick={handleDeleteCategoryClick}>Delete Category</button>
-                
+                </div>
 
 
                 <div className="createCategory">
