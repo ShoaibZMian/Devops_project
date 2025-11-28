@@ -1,4 +1,5 @@
-﻿
+import { toast } from 'react-toastify';
+
 interface CartItem {
     productId: string;
     name: string;
@@ -35,8 +36,16 @@ export const addToCart: (item: CartItem) => void = (item: CartItem) => {
     const existingItem = cart.find((i) => i.productId === item.productId);
     if (existingItem) {
         existingItem.quantity += item.quantity;
+        toast.success(`Updated ${item.name} quantity in cart!`, {
+            position: "top-right",
+            autoClose: 3000,
+        });
     } else {
         cart.push(item);
+        toast.success(`${item.name} added to cart!`, {
+            position: "top-right",
+            autoClose: 3000,
+        });
     }
     saveCart(cart);
 }
