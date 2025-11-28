@@ -6,7 +6,8 @@ namespace backend2.Models;
 
 public class Product
 {
-    public int ProductId { get; set; }
+    [Key]
+    public string ProductId { get; set; } = Guid.NewGuid().ToString();
     public string? Name { get; set; }
 
     [Column(TypeName = "decimal(18,2)")] public decimal Price { get; set; }
