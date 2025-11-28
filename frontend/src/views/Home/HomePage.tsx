@@ -171,7 +171,7 @@ const HomeView = () => {
               className="bg-card border rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
             >
               {product.imageUrl && (
-                <div className="w-full h-48 overflow-hidden bg-muted flex items-center justify-center">
+                <div className="w-full h-48 overflow-hidden bg-white flex items-center justify-center">
                   <img
                     src={product.imageUrl}
                     alt={product.name}
