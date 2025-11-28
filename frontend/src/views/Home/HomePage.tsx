@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "../../httpCommon";
 import { addToCart } from "../../utility/CartUtility";
+import { toast } from 'react-toastify';
 
 document.title = "Home";
 
@@ -220,17 +221,26 @@ const HomeView = () => {
                   onClick={() => {
                     // Handle both camelCase and PascalCase from backend
                     const productData: any = product;
+                    const quantity = getQuantity(product.productId);
                     addToCart({
                       id: product.productId,
                       productId: product.productId,
                       name: product.name,
                       price: product.price,
-                      quantity: getQuantity(product.productId),
+                      quantity: quantity,
                       imageUrl: product.imageUrl,
                       rebateQuantity: product.rebateQuantity || productData.RebateQuantity || 0,
                       rebatePercent: product.rebatePercent || productData.RebatePercent || 0,
                       originalPrice: product.price
-                    })
+                    });
+                    toast.success(`${quantity}x ${product.name} added to cart!`, {
+                      position: "top-right",
+                      autoClose: 3000,
+                      hideProgressBar: false,
+                      closeOnClick: true,
+                      pauseOnHover: true,
+                      draggable: true,
+                    });
                   }}
                 >
                   Add to Cart
