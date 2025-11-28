@@ -10,12 +10,6 @@ type Student = {
 };
 
 const students: Student[] = [
- 
-  {
-    name: "Elias Rajabi",
-    studentId: "s215817",
-    githubUsername: "eliasrajabi",
-  },
   
   {
     name: "Shoaib Zafar Mian",
