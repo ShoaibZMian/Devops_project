@@ -11,6 +11,7 @@ interface Product {
   rebateQuantity: number;
   rebatePercent: number;
   upsellProductId: number;
+  imageUrl?: string;
 }
 interface Subcategory {
   subCategoryId: number;
@@ -167,33 +168,47 @@ const HomeView = () => {
           fetchedProducts.map((product) => (
             <div
               key={product.productId}
-              className="bg-card border rounded-xl shadow-sm hover:shadow-lg transition-shadow p-6"
+              className="bg-card border rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
             >
-              <h4 className="text-sm text-muted-foreground mb-2">
-                Product ID: {product.productId}
-              </h4>
-              <h4 className="text-xl font-semibold text-card-foreground mb-4">
-                {product.name}
-              </h4>
-              <div className="space-y-2 mb-4 text-sm">
-                <p className="text-2xl font-bold text-primary">${product.price}</p>
-                <p className="text-muted-foreground">Rebate Quantity: {product.rebateQuantity}</p>
-                <p className="text-muted-foreground">Rebate Percent: {product.rebatePercent}%</p>
-                <p className="text-muted-foreground">Upsell Product ID: {product.upsellProductId}</p>
+              {product.imageUrl && (
+                <div className="w-full h-48 overflow-hidden bg-muted">
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              <div className="p-6 flex-1 flex flex-col">
+                <h4 className="text-sm text-muted-foreground mb-2">
+                  Product ID: {product.productId}
+                </h4>
+                <h4 className="text-xl font-semibold text-card-foreground mb-4">
+                  {product.name}
+                </h4>
+                <div className="space-y-2 mb-4 text-sm flex-1">
+                  <p className="text-2xl font-bold text-primary">${product.price}</p>
+                  <p className="text-muted-foreground">Rebate Quantity: {product.rebateQuantity}</p>
+                  <p className="text-muted-foreground">Rebate Percent: {product.rebatePercent}%</p>
+                  <p className="text-muted-foreground">Upsell Product ID: {product.upsellProductId}</p>
+                </div>
+                <button
+                  className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
+                  onClick={() => {
+                    addToCart({
+                      productId: product.productId,
+                      name: product.name,
+                      price: product.price,
+                      quantity: 1
+                    })
+                  }}
+                >
+                  Add to Cart
+                </button>
               </div>
-              <button
-                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
-                onClick={() => {
-                  addToCart({
-                    productId: product.productId,
-                    name: product.name,
-                    price: product.price,
-                    quantity: 1
-                  })
-                }}
-              >
-                Add to Cart
-              </button>
             </div>
           ))
         )}

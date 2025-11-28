@@ -24,7 +24,8 @@ interface Product {
     rebateQuantity : number,
     rebatePercent : number,
     upsellProduct : string,
-    subcategoryId :  number, 
+    imageUrl?: string,
+    subcategoryId :  number,
     categoryId : number
 }
 
@@ -53,6 +54,8 @@ const AdminDashboardView = () => {
     const[rebatePercent, setRebatePercent] = useState('')
     const[upsellProduct, setUpsellProduct] = useState('')
     const[subcategoryId, setSubcategoryId] = useState('')
+    const [imageUrl, setImageUrl] = useState('')
+    const [imageFile, setImageFile] = useState<File | null>(null)
     const [deletedProduct, setDeletedProduct] = useState('')
 
     const [userId, setUserId] = useState('');
@@ -203,7 +206,8 @@ const AdminDashboardView = () => {
                         setRebateQuantity(productData.rebateQuantity)
                         setRebatePercent(productData.rebatePercent)
                         setUpsellProduct(productData.upsellProduct)
-                        
+                        setImageUrl(productData.imageUrl || '')
+
                     })
             } catch (error) {
                 console.error('Error:', error);
@@ -220,6 +224,7 @@ const AdminDashboardView = () => {
                     RebateQuantity: rebateQuantity,
                     RebatePercent: rebatePercent,
                     UpsellProductId: upsellProduct,
+                    ImageUrl: imageUrl,
                     SubcategoryId: subcategoryId,
                     CategoryId: categoryId,
                 }, {
@@ -236,6 +241,7 @@ const AdminDashboardView = () => {
                         setRebateQuantity(productData.rebateQuantity)
                         setRebatePercent(productData.rebatePercent)
                         setUpsellProduct(productData.upsellProduct)
+                        setImageUrl(productData.imageUrl || '')
 
                         window.location.reload();
                         toast.success("Product Created")
@@ -255,12 +261,13 @@ const AdminDashboardView = () => {
                     Price : Price,
                     RebateQuantity : rebateQuantity,
                     RebatePercent : rebatePercent,
-                    UpsellProduct : upsellProduct
+                    UpsellProduct : upsellProduct,
+                    ImageUrl : imageUrl
                     },{
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
-                   
+
                 })
                     .then ((response) => {
                         console.log('Product:', response.data);
@@ -270,10 +277,11 @@ const AdminDashboardView = () => {
                         setRebateQuantity(productData.rebateQuantity)
                         setRebatePercent(productData.rebatePercent)
                         setUpsellProduct(productData.upsellProduct)
-                        
+                        setImageUrl(productData.imageUrl || '')
+
                         window.location.reload();
                         toast.success("Product Updated")
-                        
+
                     }
                     )
             } catch (error) {
@@ -300,6 +308,56 @@ const deleteProduct = async (id: string) => {
         } catch (error) {
             console.error('Error:', error);
         }
+    }
+}
+
+const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        setImageFile(e.target.files[0]);
+    }
+}
+
+const uploadImage = async (productId: string) => {
+    if (!imageFile || !token) {
+        toast.error("Please select an image file");
+        return;
+    }
+
+    try {
+        // Convert file to base64
+        const reader = new FileReader();
+        reader.readAsDataURL(imageFile);
+        reader.onloadend = async () => {
+            const base64String = reader.result as string;
+            // Remove the data:image/xxx;base64, prefix
+            const base64Image = base64String.split(',')[1];
+
+            try {
+                const response = await axios.post('/api/Products/UploadImage', {
+                    Base64Image: base64Image,
+                    FileName: imageFile.name,
+                    ContentType: imageFile.type,
+                    ProductId: productId
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                console.log('Image uploaded:', response.data);
+                toast.success("Image uploaded successfully!");
+                setImageFile(null);
+                // Clear the file input
+                const fileInput = document.getElementById('imageFileInput') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                toast.error("Failed to upload image");
+            }
+        };
+    } catch (error) {
+        console.error('Error:', error);
+        toast.error("Failed to process image");
     }
 }
 
@@ -356,6 +414,10 @@ const deleteProduct = async (id: string) => {
     
     const handleGetUserClick = () => {
         getUser(userId);
+    };
+
+    const handleUploadImageClick = () => {
+        uploadImage(productId);
     };
         
     return (
@@ -442,6 +504,38 @@ const deleteProduct = async (id: string) => {
 
                 <button onClick={handleGetProductClick}>Get Product</button>
                 <button onClick={handleDeleteProductClick}>Delete Product</button>
+
+                <div style={{ marginTop: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
+                    <h5 style={{ marginBottom: '10px' }}>Upload Product Image</h5>
+                    <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg"
+                        onChange={handleImageFileChange}
+                        style={{ marginBottom: '10px' }}
+                    />
+                    {imageFile && (
+                        <p style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
+                            Selected: {imageFile.name}
+                        </p>
+                    )}
+                    <button
+                        onClick={handleUploadImageClick}
+                        disabled={!imageFile || !productId}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: imageFile && productId ? '#4CAF50' : '#ccc',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: imageFile && productId ? 'pointer' : 'not-allowed'
+                        }}
+                    >
+                        Upload Image
+                    </button>
+                    <p style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>
+                        Enter Product ID above, then select and upload an image
+                    </p>
+                </div>
             </div>
             
             <div className="createProduct">
@@ -494,6 +588,33 @@ const deleteProduct = async (id: string) => {
                         onChange={(e) => setUpsellProduct(e.target.value)}
                     />
                 </label>
+                <label>
+                    Image URL:
+                    <input
+                        type="text"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="Enter image URL (or upload below)"
+                    />
+                </label>
+                <div className="imageUploadSection">
+                    <p style={{ margin: '10px 0', fontWeight: 'bold' }}>OR Upload Image File:</p>
+                    <input
+                        id="imageFileInput"
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg"
+                        onChange={handleImageFileChange}
+                        style={{ marginBottom: '10px' }}
+                    />
+                    {imageFile && (
+                        <p style={{ fontSize: '12px', color: '#666' }}>
+                            Selected: {imageFile.name}
+                        </p>
+                    )}
+                    <p style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
+                        Note: Upload image after creating the product
+                    </p>
+                </div>
                 <label>
                     Category Id:
                     <input
@@ -561,6 +682,45 @@ const deleteProduct = async (id: string) => {
                         onChange={(e) => setUpsellProduct(e.target.value)}
                     />
                 </label>
+                <label>
+                    Image URL:
+                    <input
+                        type="text"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="Enter image URL (or upload below)"
+                    />
+                </label>
+                <div className="imageUploadSection">
+                    <p style={{ margin: '10px 0', fontWeight: 'bold' }}>OR Upload Image File:</p>
+                    <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg"
+                        onChange={handleImageFileChange}
+                        style={{ marginBottom: '10px' }}
+                    />
+                    {imageFile && (
+                        <div>
+                            <p style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
+                                Selected: {imageFile.name}
+                            </p>
+                            <button
+                                onClick={handleUploadImageClick}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#4CAF50',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    marginBottom: '10px'
+                                }}
+                            >
+                                Upload Image
+                            </button>
+                        </div>
+                    )}
+                </div>
                 <button onClick={handleUpdateProductClick}>Update Product</button>
                 
             </div>

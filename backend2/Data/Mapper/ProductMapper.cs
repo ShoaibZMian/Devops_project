@@ -17,9 +17,10 @@ namespace backend2.Data.Mapper
                 RebateQuantity = product.RebateQuantity,
                 RebatePercent = product.RebatePercent,
                 UpsellProductId = product.UpsellProductId,
+                // ImageUrl = product.ImageUrl, // TODO: Uncomment after adding ImageUrl column to Azure database
                 SubcategoryId = product.SubcategoryId,
                 CategoryId = product.CategoryId,
-         
+
             };
         }
 
@@ -34,9 +35,10 @@ namespace backend2.Data.Mapper
                 RebateQuantity = productDto.RebateQuantity,
                 RebatePercent = productDto.RebatePercent,
                 UpsellProductId = productDto.UpsellProductId,
+                // ImageUrl = productDto.ImageUrl, // TODO: Uncomment after adding ImageUrl column to Azure database
                 SubcategoryId = productDto.SubcategoryId,
                 CategoryId = productDto.CategoryId,
-               
+
             };
         }
 
@@ -51,7 +53,8 @@ namespace backend2.Data.Mapper
                 RebateQuantity = productDto.RebateQuantity,
                 RebatePercent = productDto.RebatePercent,
                 UpsellProductId = productDto.UpsellProductId,
-              
+                // ImageUrl = productDto.ImageUrl, // TODO: Uncomment after adding ImageUrl column to Azure database
+
             };
         }
     }
