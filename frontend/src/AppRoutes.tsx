@@ -11,8 +11,6 @@ const HomePage = lazy(() => import("./views/Home/HomePage.tsx"));
 
 const AboutPage = lazy(() => import("./views/About/AboutPage.tsx"));
 
-const ProductsPage = lazy(() => import("./views/Products/ProductsPage.tsx"));
-
 const Login = lazy(() => import("./views/Account/LoginView.tsx"));
 const Signup = lazy(() => import("./views/Account/SignupView.tsx"));
 const Dashboard = lazy(() => import("./views/Account/DashboardView.tsx"));
@@ -33,7 +31,6 @@ const AppRoutes = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/home" element={<HomePage />} />
-            <Route path="/products" element={<ProductsPage />} />
             <Route path="/checkout" element={<CheckoutOverviewPage />} />
             <Route path="/checkout/address" element={<AddressForm />} />
             <Route path="/checkout/payment" element={<PaymentForm />} />

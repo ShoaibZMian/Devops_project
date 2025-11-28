@@ -38,16 +38,23 @@ const CheckoutOverview = () => {
 
     let productInCart = cart.find((product: CartProduct) => product.id === id);
 
-    if (productInCart.quantity >= productInCart.rebateQuantity) {
-      productInCart.price =
-        productInCart.originalPrice * (1 - productInCart.rebatePercent / 100);
-    } else {
-      productInCart.price = productInCart.originalPrice;
+    if (!productInCart) return;
+
+    // Update quantity first
+    productInCart.quantity = Math.max(1, quantity);
+
+    // Then calculate price based on new quantity
+    if (productInCart.rebateQuantity && productInCart.rebatePercent && productInCart.originalPrice) {
+      if (productInCart.quantity >= productInCart.rebateQuantity) {
+        productInCart.price =
+          productInCart.originalPrice * (1 - productInCart.rebatePercent / 100);
+      } else {
+        productInCart.price = productInCart.originalPrice;
+      }
     }
 
     localStorage.setItem("cart", JSON.stringify(cart));
-    productInCart.quantity = Math.max(1, quantity);
-    setCart(cart);
+    setCart([...cart]);
   };
 
   const handleGiftWrapChange = (id: string, giftWrap: boolean) => {
@@ -77,7 +84,19 @@ const CheckoutOverview = () => {
 
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
     cart.forEach((product: CartProduct) => {
-      product.originalPrice = product.price;
+      // Only set originalPrice if it doesn't exist
+      if (!product.originalPrice) {
+        product.originalPrice = product.price;
+      }
+
+      // Apply rebate if quantity meets threshold
+      if (product.rebateQuantity && product.rebatePercent && product.originalPrice) {
+        if (product.quantity >= product.rebateQuantity) {
+          product.price = product.originalPrice * (1 - product.rebatePercent / 100);
+        } else {
+          product.price = product.originalPrice;
+        }
+      }
     });
 
     setCart(cart);
@@ -111,9 +130,9 @@ const CheckoutOverview = () => {
       );
 
       if (upsellProduct) {
-        return `Consider upgrading to ${upsellProduct.name} for just $${
+        return `Consider upgrading to ${upsellProduct.name} for just ${
           (upsellProduct.price - currentProduct.price).toFixed(2)
-        } more!`;
+        } DKK more!`;
       }
     }
     return null;
@@ -183,7 +202,7 @@ const CheckoutOverview = () => {
                         {item.name}
                       </h4>
                       <p className="text-2xl font-bold text-primary mb-4">
-                        ${item.price}
+                        {item.price} DKK
                       </p>
 
                       {/* Nudges */}
@@ -243,7 +262,7 @@ const CheckoutOverview = () => {
                       <div className="text-center mb-4 p-3 bg-muted rounded-md">
                         <span className="text-sm text-muted-foreground">Subtotal: </span>
                         <span className="text-lg font-bold text-primary">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          {(item.price * item.quantity).toFixed(2)} DKK
                         </span>
                       </div>
 
@@ -263,7 +282,7 @@ const CheckoutOverview = () => {
               <div className="bg-card border rounded-xl shadow-sm p-6 mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold text-card-foreground">Order Total</h2>
-                  <p className="text-3xl font-bold text-primary">${total.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-primary">{total.toFixed(2)} DKK</p>
                 </div>
                 <button
                   onClick={handleLoginForm}

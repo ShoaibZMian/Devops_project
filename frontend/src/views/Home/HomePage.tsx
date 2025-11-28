@@ -190,9 +190,9 @@ const HomeView = () => {
                   {product.name}
                 </h4>
                 <div className="space-y-2 mb-4 text-sm flex-1">
-                  <p className="text-2xl font-bold text-primary">${product.price}</p>
-                  <p className="text-muted-foreground">Rebate Quantity: {product.rebateQuantity}</p>
-                  <p className="text-muted-foreground">Rebate Percent: {product.rebatePercent}%</p>
+                  <p className="text-2xl font-bold text-primary">{product.price} DKK</p>
+                  <p className="text-muted-foreground">Rebate Quantity: {product.rebateQuantity || (product as any).RebateQuantity || 0}</p>
+                  <p className="text-muted-foreground">Rebate Percent: {product.rebatePercent || (product as any).RebatePercent || 0}%</p>
                   <p className="text-muted-foreground">Upsell Product ID: {product.upsellProductId}</p>
                 </div>
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -218,12 +218,18 @@ const HomeView = () => {
                 <button
                   className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
                   onClick={() => {
+                    // Handle both camelCase and PascalCase from backend
+                    const productData: any = product;
                     addToCart({
+                      id: product.productId,
                       productId: product.productId,
                       name: product.name,
                       price: product.price,
                       quantity: getQuantity(product.productId),
-                      imageUrl: product.imageUrl
+                      imageUrl: product.imageUrl,
+                      rebateQuantity: product.rebateQuantity || productData.RebateQuantity || 0,
+                      rebatePercent: product.rebatePercent || productData.RebatePercent || 0,
+                      originalPrice: product.price
                     })
                   }}
                 >
