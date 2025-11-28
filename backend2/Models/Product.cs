@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using backend2.Models.Enum;
 
@@ -16,7 +17,6 @@ public class Product
     public int RebatePercent { get; set; }
     public string? UpsellProductId { get; set; }
 
-    [NotMapped] // TODO: Remove [NotMapped] after adding ImageUrl column to Azure database
     public string? ImageUrl { get; set; }
     public string? FileName { get; set; }
     public string? ContentType { get; set; }
