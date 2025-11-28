@@ -216,98 +216,136 @@ const AdminDashboardView = () => {
     }
 
     const createProduct = async () => {
-        if (token) {
-            try {
-                axios.post('api/Products/CreateProduct', {
-                    Name: Name,
-                    Price: Price,
-                    RebateQuantity: rebateQuantity,
-                    RebatePercent: rebatePercent,
-                    UpsellProductId: upsellProduct,
-                    ImageUrl: imageUrl,
-                    SubcategoryId: subcategoryId,
-                    CategoryId: categoryId,
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                    .then((response) => {
-                        console.log('Product:', response.data);
-                        const productData = response.data
-                        setProductName(productData.name)
-                        setPrice(productData.price)
-                        setCurrency(productData.currency)
-                        setRebateQuantity(productData.rebateQuantity)
-                        setRebatePercent(productData.rebatePercent)
-                        setUpsellProduct(productData.upsellProduct)
-                        setImageUrl(productData.imageUrl || '')
+        if (!token) {
+            toast.error("Authentication required");
+            return;
+        }
 
-                        window.location.reload();
-                        toast.success("Product Created")
-                    })
-            } catch (error) {
-                console.error('Error:', error);
-            }
+        // Validate required fields
+        if (!Name || !Price || !categoryId) {
+            toast.error("Please fill in Product Name, Price, and Category ID");
+            return;
+        }
+
+        try {
+            const response = await axios.post('api/Products/CreateProduct', {
+                Name: Name,
+                Price: Price,
+                RebateQuantity: rebateQuantity,
+                RebatePercent: rebatePercent,
+                UpsellProductId: upsellProduct,
+                ImageUrl: imageUrl,
+                SubcategoryId: subcategoryId,
+                CategoryId: categoryId,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            console.log('Product:', response.data);
+            const productData = response.data;
+            setProductName(productData.name);
+            setPrice(productData.price);
+            setCurrency(productData.currency);
+            setRebateQuantity(productData.rebateQuantity);
+            setRebatePercent(productData.rebatePercent);
+            setUpsellProduct(productData.upsellProduct);
+            setImageUrl(productData.imageUrl || '');
+
+            toast.success("Product Created Successfully!");
+
+            // Reload after a short delay to show the toast
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } catch (error: any) {
+            console.error('Error:', error);
+            const errorMessage = error.response?.data?.message || error.response?.data || "Failed to create product";
+            toast.error(`Error: ${errorMessage}`);
         }
     }
 
     const updateProduct = async (id: string) => {
-        if (id && token) {
-            try {
-                axios.put(`/api/Products/UpdateProduct/${id}`, {
-                    productId : id,
-                    Name : Name,
-                    Price : Price,
-                    RebateQuantity : rebateQuantity,
-                    RebatePercent : rebatePercent,
-                    UpsellProduct : upsellProduct,
-                    ImageUrl : imageUrl
-                    },{
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+        if (!id) {
+            toast.error("Please enter a Product ID to update");
+            return;
+        }
 
-                })
-                    .then ((response) => {
-                        console.log('Product:', response.data);
-                        const productData = response.data
-                        setProductName(productData.name)
-                        setPrice(productData.price)
-                        setRebateQuantity(productData.rebateQuantity)
-                        setRebatePercent(productData.rebatePercent)
-                        setUpsellProduct(productData.upsellProduct)
-                        setImageUrl(productData.imageUrl || '')
+        if (!token) {
+            toast.error("Authentication required");
+            return;
+        }
 
-                        window.location.reload();
-                        toast.success("Product Updated")
+        try {
+            const response = await axios.put(`/api/Products/UpdateProduct/${id}`, {
+                productId : id,
+                Name : Name,
+                Price : Price,
+                RebateQuantity : rebateQuantity,
+                RebatePercent : rebatePercent,
+                UpsellProduct : upsellProduct,
+                ImageUrl : imageUrl
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
-                    }
-                    )
-            } catch (error) {
-                console.error('Error:', error);
-            }
+            console.log('Product:', response.data);
+            const productData = response.data;
+            setProductName(productData.name);
+            setPrice(productData.price);
+            setRebateQuantity(productData.rebateQuantity);
+            setRebatePercent(productData.rebatePercent);
+            setUpsellProduct(productData.upsellProduct);
+            setImageUrl(productData.imageUrl || '');
+
+            toast.success("Product Updated Successfully!");
+
+            // Reload after a short delay to show the toast
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } catch (error: any) {
+            console.error('Error:', error);
+            const errorMessage = error.response?.data?.message || error.response?.data || "Failed to update product";
+            toast.error(`Error: ${errorMessage}`);
         }
     }
 
 const deleteProduct = async (id: string) => {
-    if (id && token) {
-        try {
-            axios.delete(`/api/Products/DeleteProduct/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-                .then ((response) => {
-                    console.log('Product:', response.data);
-                    const productData = response.data
-                    setDeletedProduct(productData.name)
-                    window.location.reload();
-                    toast.success("Product Deleted")
-                })
-        } catch (error) {
-            console.error('Error:', error);
-        }
+    if (!id) {
+        toast.error("Please enter a Product ID to delete");
+        return;
+    }
+
+    if (!token) {
+        toast.error("Authentication required");
+        return;
+    }
+
+    try {
+        const response = await axios.delete(`/api/Products/DeleteProduct/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        console.log('Product:', response.data);
+        const productData = response.data;
+        setDeletedProduct(productData.name);
+
+        toast.success("Product Deleted Successfully!");
+
+        // Reload after a short delay to show the toast
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    } catch (error: any) {
+        console.error('Error:', error);
+        const errorMessage = error.response?.data?.message || error.response?.data || "Failed to delete product";
+        toast.error(`Error: ${errorMessage}`);
     }
 }
 
