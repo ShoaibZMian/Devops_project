@@ -146,18 +146,6 @@ const HomeView = () => {
             Search
           </button>
         </form>
-
-        {/* Categories */}
-        {Array.isArray(categories) && categories.map(category => (
-          <div key={category.categoryId} className="mb-4">
-            <h2 className="text-lg font-semibold mb-2">{category.name}</h2>
-            {Array.isArray(category.subCategory) && category.subCategory.map(subcategory => (
-              <div key={subcategory.subCategoryId} className="ml-4 mb-2">
-                <h3 className="text-md font-medium text-muted-foreground">{subcategory.subCategoryName}</h3>
-              </div>
-            ))}
-          </div>
-        ))}
       </div>
 
       {/* Products Grid */}
