@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
-import "../../styles/products/ProductCard.css";
-import { get } from "http";
+import React, { useState } from "react";
+import { Card, CardContent, CardFooter } from "../ui/card";
+import { Button } from "../ui/button";
 
 interface ProductCardProps {
   name: string;
@@ -11,7 +11,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = (props: ProductCardProps) => {
-  const { imageUrl } = props;
+  const { imageUrl, name, price, currency } = props;
   const [quantity, setQuantity] = useState(1);
 
   const handleQuantityChange = (newQuantity: number) => {
@@ -19,58 +19,61 @@ const ProductCard = (props: ProductCardProps) => {
   };
 
   return (
-    <div className="product-card" style={{ minHeight: "450px" }}>
-      <div
-        className="content"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          paddingBottom: "20px",
-        }}
-      >
-        {imageUrl && (
-          <img
-            loading="lazy"
-            src={props.imageUrl}
-            alt={props.name}
-            height={100}
-            width={100}
-            style={{ maxHeight: "100px", maxWidth: "200px" }}
-          />
-        )}
-        <h2>{props.name}</h2>
-        <div className="price">
-          {props.price} {props.currency}
+    <Card className="overflow-hidden transition-shadow hover:shadow-lg">
+      <CardContent className="p-6">
+        <div className="flex flex-col items-center gap-4">
+          {imageUrl && (
+            <div className="w-full h-48 flex items-center justify-center overflow-hidden rounded-md bg-muted">
+              <img
+                loading="lazy"
+                src={imageUrl}
+                alt={name}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+          )}
+          <h2 className="text-xl font-semibold text-center text-card-foreground">
+            {name}
+          </h2>
+          <div className="text-2xl font-bold text-primary">
+            {price} {currency}
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <Button
+              onClick={() => handleQuantityChange(quantity - 1)}
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+            >
+              -
+            </Button>
+            <input
+              type="number"
+              value={quantity}
+              onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
+              className="w-16 text-center border rounded-md px-2 py-1 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <Button
+              onClick={() => handleQuantityChange(quantity + 1)}
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+            >
+              +
+            </Button>
+          </div>
         </div>
-        <div className="quantity-controls">
-          <button
-            onClick={() => handleQuantityChange(quantity - 1)}
-            className="minus-btn"
-          >
-            -
-          </button>
-          <input
-            type="number"
-            value={quantity}
-            onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
-            className="quantity-input"
-          />
-          <button
-            onClick={() => handleQuantityChange(quantity + 1)}
-            className="plus-btn"
-          >
-            +
-          </button>
-        </div>
-      </div>
-      <button
-        onClick={() => props.onAddToCart(quantity)}
-        className="add-to-cart-btn"
-      >
-        Add to Cart
-      </button>
-    </div>
+      </CardContent>
+      <CardFooter className="pt-0">
+        <Button
+          onClick={() => props.onAddToCart(quantity)}
+          className="w-full"
+          size="lg"
+        >
+          Add to Cart
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
