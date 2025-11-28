@@ -10,13 +10,7 @@ type Student = {
 };
 
 const students: Student[] = [
- 
-  {
-    name: "Elias Rajabi",
-    studentId: "s215817",
-    githubUsername: "eliasrajabi",
-  },
-  
+
   {
     name: "Shoaib Zafar Mian",
     studentId: "s200784",
@@ -67,7 +61,7 @@ const About: React.FC = () => {
     <FullScreenWrapper>
       <FullSizeSpaceContainer>
         <StyledDiv>
-          <Title>Group 24</Title>
+          <Title>Group 9</Title>
           <Description>
             Below is a list of the participants along with their student ID and
             github username

@@ -14,6 +14,9 @@ public class Product
     public int RebateQuantity { get; set; }
     public int RebatePercent { get; set; }
     public string? UpsellProductId { get; set; }
+
+    [NotMapped] // TODO: Remove [NotMapped] after adding ImageUrl column to Azure database
+    public string? ImageUrl { get; set; }
     public string? FileName { get; set; }
     public string? ContentType { get; set; }
     public string? Path { get; set; }

@@ -12,14 +12,9 @@ const StandardLayout = ({ children }: StandardLayoutProps) => {
   return (
     <div className="layout-wrapper">
       <Navbar />
-      <div className="layout-wrapper">
-        <main className="layout-main">
-          <div className="h-full">
-            <div className="layout-container container">{children}</div>
-            <div className="layout-footer"></div>
-          </div>
-        </main>
-      </div>
+      <main className="layout-main">
+        <div className="layout-container">{children}</div>
+      </main>
     </div>
   );
 };

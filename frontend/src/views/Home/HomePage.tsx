@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "../../httpCommon";
-
-import '../../styles/home/Home.css';
-// import ProductCard from "../../components/card/ProductCard";
 import { addToCart } from "../../utility/CartUtility";
-
 
 document.title = "Home";
 
@@ -15,6 +11,7 @@ interface Product {
   rebateQuantity: number;
   rebatePercent: number;
   upsellProductId: number;
+  imageUrl?: string;
 }
 interface Subcategory {
   subCategoryId: number;
@@ -37,8 +34,6 @@ const HomeView = () => {
   const [keywords, setKeywords] = useState('');
   const [sortBy, setSortBy] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategory[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
 
 
   useEffect(() => {
@@ -57,18 +52,6 @@ const HomeView = () => {
       })
       .catch(error => console.error('Error fetching categories:', error));
   }, []);
-
-  const handleSubcategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const subCategoryId = parseInt(e.target.value);
-    const selectedCategory = categories.find(category => category.subCategory.some(subcategory => subcategory.subCategoryId === subCategoryId));
-    if (selectedCategory) {
-      const selectedSubcategory = selectedCategory.subCategory.find(subcategory => subcategory.subCategoryId === subCategoryId);
-      if (selectedSubcategory) {
-        setProducts(selectedSubcategory.product);
-        setSelectedSubcategory([selectedSubcategory]);
-      }
-    }
-  };
 
   const fetchProductsList = async () => {
     axios
@@ -110,81 +93,121 @@ const HomeView = () => {
 
   return (
     <>
-      <div className="searchBar">
-        <form onSubmit={handleSearch}>
-          <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)}
-            placeholder="Product Name..." />
-          <input type="text" value={category} onChange={(e) => setCategory(e.target.value)}
-            placeholder="Category..." />
-          <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)}
-            placeholder="Min Price..." />
-          <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)}
-            placeholder="Max Price..." />
-          <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)}
-            placeholder="Keywords..." />
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+      {/* Search Section */}
+      <div className="mb-8 border-b pb-6">
+        <form onSubmit={handleSearch} className="flex flex-wrap gap-4 mb-6">
+          <input
+            type="text"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            placeholder="Product Name..."
+            className="flex-1 min-w-[150px] px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <input
+            type="text"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Category..."
+            className="flex-1 min-w-[150px] px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <input
+            type="number"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            placeholder="Min Price..."
+            className="w-32 px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <input
+            type="number"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            placeholder="Max Price..."
+            className="w-32 px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <input
+            type="text"
+            value={keywords}
+            onChange={(e) => setKeywords(e.target.value)}
+            placeholder="Keywords..."
+            className="flex-1 min-w-[150px] px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          >
             <option value="">Sort By...</option>
             <option value="price">Price</option>
-
           </select>
-
-          <button type="submit">Search</button>
-
+          <button
+            type="submit"
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
+          >
+            Search
+          </button>
         </form>
+
+        {/* Categories */}
         {Array.isArray(categories) && categories.map(category => (
-          <div className="categories" key={category.categoryId}>
-            <h2>{category.name}</h2>
+          <div key={category.categoryId} className="mb-4">
+            <h2 className="text-lg font-semibold mb-2">{category.name}</h2>
             {Array.isArray(category.subCategory) && category.subCategory.map(subcategory => (
-              <div key={subcategory.subCategoryId}>
-                <h3>{subcategory.subCategoryName}</h3>
-                {Array.isArray(subcategory.product) && subcategory.product.map(product => (
-                  <div key={product.productId}>
-                    <h4>{product.name}</h4>
-                    <p>{product.price}</p>
-                  </div>
-                ))}
+              <div key={subcategory.subCategoryId} className="ml-4 mb-2">
+                <h3 className="text-md font-medium text-muted-foreground">{subcategory.subCategoryName}</h3>
               </div>
             ))}
           </div>
         ))}
-
       </div>
 
-      <div className='flex '>
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {!Array.isArray(fetchedProducts) || fetchedProducts.length === 0 ? (
-          <div>Loading...</div>
+          <div className="col-span-full text-center py-8 text-muted-foreground">Loading...</div>
         ) : (
-          fetchedProducts.map((product, index) => (
-            <div key={product.productId}>
-              <div className='card'>
-                <div className='card-body'>
-                  <h4 className={' text-black'}>Product Id: {product.productId}</h4>
-                  <h4 className='card-title'>
-                    Product name: {product.name}
-                  </h4>
-                  <div className='card-actions '>
-                    <p>Price: {product.price}</p>
-                    <p>Rebate Quantity: {product.rebateQuantity}</p>
-                    <p>Rebate Percent: {product.rebatePercent}</p>
-                    <p>Upsell Product Id: {product.upsellProductId}</p>
-                    {/* Add other product details as needed */}
-                  </div>
-                  <div className='card-actions '>
-                    <button
-                      className='btn '
-                      onClick={() => {
-                        addToCart({
-                          productId: product.productId,
-                          name: product.name,
-                          price: product.price,
-                          quantity: 1
-                        })
-                      }}
-                    >
-                      Add to cart
-                    </button>
-                  </div>
+          fetchedProducts.map((product) => (
+            <div
+              key={product.productId}
+              className="bg-card border rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
+            >
+              {product.imageUrl && (
+                <div className="w-full h-48 overflow-hidden bg-muted">
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 </div>
+              )}
+              <div className="p-6 flex-1 flex flex-col">
+                <h4 className="text-sm text-muted-foreground mb-2">
+                  Product ID: {product.productId}
+                </h4>
+                <h4 className="text-xl font-semibold text-card-foreground mb-4">
+                  {product.name}
+                </h4>
+                <div className="space-y-2 mb-4 text-sm flex-1">
+                  <p className="text-2xl font-bold text-primary">${product.price}</p>
+                  <p className="text-muted-foreground">Rebate Quantity: {product.rebateQuantity}</p>
+                  <p className="text-muted-foreground">Rebate Percent: {product.rebatePercent}%</p>
+                  <p className="text-muted-foreground">Upsell Product ID: {product.upsellProductId}</p>
+                </div>
+                <button
+                  className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
+                  onClick={() => {
+                    addToCart({
+                      productId: product.productId,
+                      name: product.name,
+                      price: product.price,
+                      quantity: 1
+                    })
+                  }}
+                >
+                  Add to Cart
+                </button>
               </div>
             </div>
           ))

@@ -24,7 +24,8 @@ interface Product {
     rebateQuantity : number,
     rebatePercent : number,
     upsellProduct : string,
-    subcategoryId :  number, 
+    imageUrl?: string,
+    subcategoryId :  number,
     categoryId : number
 }
 
@@ -53,6 +54,8 @@ const AdminDashboardView = () => {
     const[rebatePercent, setRebatePercent] = useState('')
     const[upsellProduct, setUpsellProduct] = useState('')
     const[subcategoryId, setSubcategoryId] = useState('')
+    const [imageUrl, setImageUrl] = useState('')
+    const [imageFile, setImageFile] = useState<File | null>(null)
     const [deletedProduct, setDeletedProduct] = useState('')
 
     const [userId, setUserId] = useState('');
@@ -203,7 +206,8 @@ const AdminDashboardView = () => {
                         setRebateQuantity(productData.rebateQuantity)
                         setRebatePercent(productData.rebatePercent)
                         setUpsellProduct(productData.upsellProduct)
-                        
+                        setImageUrl(productData.imageUrl || '')
+
                     })
             } catch (error) {
                 console.error('Error:', error);
@@ -212,94 +216,186 @@ const AdminDashboardView = () => {
     }
 
     const createProduct = async () => {
-        if (token) {
-            try {
-                axios.post('api/Products/CreateProduct', {
-                    Name: Name,
-                    Price: Price,
-                    RebateQuantity: rebateQuantity,
-                    RebatePercent: rebatePercent,
-                    UpsellProductId: upsellProduct,
-                    SubcategoryId: subcategoryId,
-                    CategoryId: categoryId,
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                    .then((response) => {
-                        console.log('Product:', response.data);
-                        const productData = response.data
-                        setProductName(productData.name)
-                        setPrice(productData.price)
-                        setCurrency(productData.currency)
-                        setRebateQuantity(productData.rebateQuantity)
-                        setRebatePercent(productData.rebatePercent)
-                        setUpsellProduct(productData.upsellProduct)
+        if (!token) {
+            toast.error("Authentication required");
+            return;
+        }
 
-                        window.location.reload();
-                        toast.success("Product Created")
-                    })
-            } catch (error) {
-                console.error('Error:', error);
-            }
+        // Validate required fields
+        if (!Name || !Price || !categoryId) {
+            toast.error("Please fill in Product Name, Price, and Category ID");
+            return;
+        }
+
+        try {
+            const response = await axios.post('api/Products/CreateProduct', {
+                Name: Name,
+                Price: Price,
+                RebateQuantity: rebateQuantity,
+                RebatePercent: rebatePercent,
+                UpsellProductId: upsellProduct,
+                ImageUrl: imageUrl,
+                SubcategoryId: subcategoryId,
+                CategoryId: categoryId,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            console.log('Product:', response.data);
+            const productData = response.data;
+            setProductName(productData.name);
+            setPrice(productData.price);
+            setCurrency(productData.currency);
+            setRebateQuantity(productData.rebateQuantity);
+            setRebatePercent(productData.rebatePercent);
+            setUpsellProduct(productData.upsellProduct);
+            setImageUrl(productData.imageUrl || '');
+
+            toast.success("Product Created Successfully!");
+
+            // Reload after a short delay to show the toast
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } catch (error: any) {
+            console.error('Error:', error);
+            const errorMessage = error.response?.data?.message || error.response?.data || "Failed to create product";
+            toast.error(`Error: ${errorMessage}`);
         }
     }
 
     const updateProduct = async (id: string) => {
-        if (id && token) {
-            try {
-                axios.put(`/api/Products/UpdateProduct/${id}`, {
-                    productId : id,
-                    Name : Name,
-                    Price : Price,
-                    RebateQuantity : rebateQuantity,
-                    RebatePercent : rebatePercent,
-                    UpsellProduct : upsellProduct
-                    },{
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                   
-                })
-                    .then ((response) => {
-                        console.log('Product:', response.data);
-                        const productData = response.data
-                        setProductName(productData.name)
-                        setPrice(productData.price)
-                        setRebateQuantity(productData.rebateQuantity)
-                        setRebatePercent(productData.rebatePercent)
-                        setUpsellProduct(productData.upsellProduct)
-                        
-                        window.location.reload();
-                        toast.success("Product Updated")
-                        
-                    }
-                    )
-            } catch (error) {
-                console.error('Error:', error);
-            }
+        if (!id) {
+            toast.error("Please enter a Product ID to update");
+            return;
+        }
+
+        if (!token) {
+            toast.error("Authentication required");
+            return;
+        }
+
+        try {
+            const response = await axios.put(`/api/Products/UpdateProduct/${id}`, {
+                productId : id,
+                Name : Name,
+                Price : Price,
+                RebateQuantity : rebateQuantity,
+                RebatePercent : rebatePercent,
+                UpsellProduct : upsellProduct,
+                ImageUrl : imageUrl
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            console.log('Product:', response.data);
+            const productData = response.data;
+            setProductName(productData.name);
+            setPrice(productData.price);
+            setRebateQuantity(productData.rebateQuantity);
+            setRebatePercent(productData.rebatePercent);
+            setUpsellProduct(productData.upsellProduct);
+            setImageUrl(productData.imageUrl || '');
+
+            toast.success("Product Updated Successfully!");
+
+            // Reload after a short delay to show the toast
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } catch (error: any) {
+            console.error('Error:', error);
+            const errorMessage = error.response?.data?.message || error.response?.data || "Failed to update product";
+            toast.error(`Error: ${errorMessage}`);
         }
     }
 
 const deleteProduct = async (id: string) => {
-    if (id && token) {
-        try {
-            axios.delete(`/api/Products/DeleteProduct/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-                .then ((response) => {
-                    console.log('Product:', response.data);
-                    const productData = response.data
-                    setDeletedProduct(productData.name)
-                    window.location.reload();
-                    toast.success("Product Deleted")
-                })
-        } catch (error) {
-            console.error('Error:', error);
-        }
+    if (!id) {
+        toast.error("Please enter a Product ID to delete");
+        return;
+    }
+
+    if (!token) {
+        toast.error("Authentication required");
+        return;
+    }
+
+    try {
+        const response = await axios.delete(`/api/Products/DeleteProduct/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        console.log('Product:', response.data);
+        const productData = response.data;
+        setDeletedProduct(productData.name);
+
+        toast.success("Product Deleted Successfully!");
+
+        // Reload after a short delay to show the toast
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    } catch (error: any) {
+        console.error('Error:', error);
+        const errorMessage = error.response?.data?.message || error.response?.data || "Failed to delete product";
+        toast.error(`Error: ${errorMessage}`);
+    }
+}
+
+const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        setImageFile(e.target.files[0]);
+    }
+}
+
+const uploadImage = async (productId: string) => {
+    if (!imageFile || !token) {
+        toast.error("Please select an image file");
+        return;
+    }
+
+    try {
+        // Convert file to base64
+        const reader = new FileReader();
+        reader.readAsDataURL(imageFile);
+        reader.onloadend = async () => {
+            const base64String = reader.result as string;
+            // Remove the data:image/xxx;base64, prefix
+            const base64Image = base64String.split(',')[1];
+
+            try {
+                const response = await axios.post('/api/Products/UploadImage', {
+                    Base64Image: base64Image,
+                    FileName: imageFile.name,
+                    ContentType: imageFile.type,
+                    ProductId: productId
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                console.log('Image uploaded:', response.data);
+                toast.success("Image uploaded successfully!");
+                setImageFile(null);
+                // Clear the file input
+                const fileInput = document.getElementById('imageFileInput') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                toast.error("Failed to upload image");
+            }
+        };
+    } catch (error) {
+        console.error('Error:', error);
+        toast.error("Failed to process image");
     }
 }
 
@@ -356,6 +452,10 @@ const deleteProduct = async (id: string) => {
     
     const handleGetUserClick = () => {
         getUser(userId);
+    };
+
+    const handleUploadImageClick = () => {
+        uploadImage(productId);
     };
         
     return (
@@ -442,6 +542,38 @@ const deleteProduct = async (id: string) => {
 
                 <button onClick={handleGetProductClick}>Get Product</button>
                 <button onClick={handleDeleteProductClick}>Delete Product</button>
+
+                <div style={{ marginTop: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
+                    <h5 style={{ marginBottom: '10px' }}>Upload Product Image</h5>
+                    <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg"
+                        onChange={handleImageFileChange}
+                        style={{ marginBottom: '10px' }}
+                    />
+                    {imageFile && (
+                        <p style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
+                            Selected: {imageFile.name}
+                        </p>
+                    )}
+                    <button
+                        onClick={handleUploadImageClick}
+                        disabled={!imageFile || !productId}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: imageFile && productId ? '#4CAF50' : '#ccc',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: imageFile && productId ? 'pointer' : 'not-allowed'
+                        }}
+                    >
+                        Upload Image
+                    </button>
+                    <p style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>
+                        Enter Product ID above, then select and upload an image
+                    </p>
+                </div>
             </div>
             
             <div className="createProduct">
@@ -494,6 +626,33 @@ const deleteProduct = async (id: string) => {
                         onChange={(e) => setUpsellProduct(e.target.value)}
                     />
                 </label>
+                <label>
+                    Image URL:
+                    <input
+                        type="text"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="Enter image URL (or upload below)"
+                    />
+                </label>
+                <div className="imageUploadSection">
+                    <p style={{ margin: '10px 0', fontWeight: 'bold' }}>OR Upload Image File:</p>
+                    <input
+                        id="imageFileInput"
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg"
+                        onChange={handleImageFileChange}
+                        style={{ marginBottom: '10px' }}
+                    />
+                    {imageFile && (
+                        <p style={{ fontSize: '12px', color: '#666' }}>
+                            Selected: {imageFile.name}
+                        </p>
+                    )}
+                    <p style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
+                        Note: Upload image after creating the product
+                    </p>
+                </div>
                 <label>
                     Category Id:
                     <input
@@ -561,6 +720,45 @@ const deleteProduct = async (id: string) => {
                         onChange={(e) => setUpsellProduct(e.target.value)}
                     />
                 </label>
+                <label>
+                    Image URL:
+                    <input
+                        type="text"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="Enter image URL (or upload below)"
+                    />
+                </label>
+                <div className="imageUploadSection">
+                    <p style={{ margin: '10px 0', fontWeight: 'bold' }}>OR Upload Image File:</p>
+                    <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg"
+                        onChange={handleImageFileChange}
+                        style={{ marginBottom: '10px' }}
+                    />
+                    {imageFile && (
+                        <div>
+                            <p style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
+                                Selected: {imageFile.name}
+                            </p>
+                            <button
+                                onClick={handleUploadImageClick}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#4CAF50',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    marginBottom: '10px'
+                                }}
+                            >
+                                Upload Image
+                            </button>
+                        </div>
+                    )}
+                </div>
                 <button onClick={handleUpdateProductClick}>Update Product</button>
                 
             </div>

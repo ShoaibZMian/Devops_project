@@ -1,7 +1,6 @@
-import NavbarLogo from "./NavbarLogo";
-import "../../styles/navbar/Navbar.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { Button } from "../ui/button";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -17,40 +16,73 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar">
-      <div className="nav-left">
-        <NavbarLogo />
-      </div>
-      <div className="nav-center">
-        <a href="/" className="nav-item">
-          Home
-        </a>
-        <a href="/products" className="nav-item">
-          Products
-        </a>
-        <a href="/about" className="nav-item">
-          About
-        </a>
-        {!authenticated && (
-          <a href="/login" className="nav-item">
-            Login
+    <nav className="border-b bg-background sticky top-0 z-50 shadow-sm">
+      <div className="w-full max-w-5xl mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center flex-wrap gap-4 py-2 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center">
+          <Link to="/">
+            <img
+              src="/9a1fc0711d294b37a251d8baf786ac68-free.png"
+              alt="Shoaib Store"
+              className="h-24 w-auto"
+            />
+          </Link>
+        </div>
+
+        <div className="flex flex-wrap gap-1 sm:gap-2 items-center justify-center">
+          <a
+            href="/"
+            className="text-foreground hover:text-primary transition-colors px-3 py-2 text-sm font-medium"
+          >
+            Home
           </a>
-        )}
-        {authenticated && admin && (
-          <a href="/dashboard" className="nav-item">
-            Dashboard
+          <a
+            href="/products"
+            className="text-foreground hover:text-primary transition-colors px-3 py-2 text-sm font-medium"
+          >
+            Products
           </a>
-        )}
-        {authenticated && (
-          <button onClick={handleLogout} className="nav-item" style={{background: 'none', border: 'none', cursor: 'pointer'}}>
-            Logout
-          </button>
-        )}
-      </div>
-      <div className="nav-right">
-        <button className="cart-button" onClick={navigateToCheckout}>
-          Cart
-        </button>
+          <a
+            href="/about"
+            className="text-foreground hover:text-primary transition-colors px-3 py-2 text-sm font-medium"
+          >
+            About
+          </a>
+          {!authenticated && (
+            <a
+              href="/login"
+              className="text-foreground hover:text-primary transition-colors px-3 py-2 text-sm font-medium"
+            >
+              Login
+            </a>
+          )}
+          {authenticated && admin && (
+            <a
+              href="/dashboard"
+              className="text-foreground hover:text-primary transition-colors px-3 py-2 text-sm font-medium"
+            >
+              Dashboard
+            </a>
+          )}
+          {authenticated && (
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              size="sm"
+            >
+              Logout
+            </Button>
+          )}
+        </div>
+
+        <div className="flex gap-2 items-center">
+          <Button
+            onClick={navigateToCheckout}
+            variant="default"
+            size="default"
+          >
+            Cart
+          </Button>
+        </div>
       </div>
     </nav>
   );

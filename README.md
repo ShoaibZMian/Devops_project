@@ -17,13 +17,24 @@ A full-stack e-commerce application built with React TypeScript frontend and ASP
 │   ├── Dockerfile              # Multi-stage build with runtime config
 │   ├── docker-entrypoint.sh    # Generates runtime environment config
 │   ├── docker-compose.yml
-│   └── src/httpCommon.jsx      # Axios instance with JWT interceptor
+│   └── src/
+│       ├── contexts/
+│       │   └── AuthContext.tsx # Global authentication state (React Context)
+│       ├── hooks/
+│       │   └── useCart.ts      # Reusable cart management hook
+│       ├── httpCommon.jsx      # Axios instance with JWT interceptor
+│       ├── utils/auth.ts       # JWT token utilities
+│       ├── views/              # Page components
+│       └── components/         # Reusable UI components
 ├── backend2/                   # ASP.NET Core 7.0 Web API
 │   ├── Dockerfile              # Multi-stage build
 │   ├── docker-compose.yml
 │   └── Controllers/            # API endpoints and repositories
 ├── .github/workflows/          # CI/CD pipelines
 │   └── azure-deploy.yml        # Automated Azure deployment
+├── STATE_MANAGEMENT_IMPLEMENTATION.md  # State management documentation
+├── LOCAL_TESTING_GUIDE.md     # Local testing instructions
+├── CLAUDE.md                   # Development guidelines for AI assistants
 └── run-all.sh                  # Local development orchestration
 ```
 
@@ -33,6 +44,7 @@ A full-stack e-commerce application built with React TypeScript frontend and ASP
 - React 18 with TypeScript
 - React Router for navigation
 - Axios for HTTP requests with JWT auto-injection
+- **State Management**: React Context API for authentication, custom hooks for cart
 - Runtime environment configuration
 - Nginx (production)
 
@@ -180,6 +192,79 @@ ASPNETCORE_ENVIRONMENT=Production
 - **RESTful API**: Clean, documented API architecture
 - **Auto-Deployment**: Push to main = automatic deployment
 
+## State Management Architecture
+
+### Authentication State (React Context API)
+
+Global authentication state managed via React Context:
+
+**Location**: `frontend/src/contexts/AuthContext.tsx`
+
+**Provides**:
+- JWT token management with localStorage persistence
+- User authentication status (isAuthenticated)
+- Admin authorization checks (isAdmin)
+- User profile information from JWT claims
+- Automatic token expiration handling
+- Reactive updates across all components
+
+**Usage in components**:
+```typescript
+import { useAuth } from '../contexts/AuthContext';
+
+function MyComponent() {
+  const { isAuthenticated, isAdmin, userName, login, logout } = useAuth();
+  // Component automatically re-renders when auth state changes
+}
+```
+
+**Key Benefits**:
+- Single source of truth for auth state
+- No prop drilling - any component can access via `useAuth()` hook
+- Automatic logout on token expiration (checked every minute)
+- Syncs with localStorage for persistence across sessions
+
+### Cart State (Custom Hook)
+
+Reusable cart management via custom hook:
+
+**Location**: `frontend/src/hooks/useCart.ts`
+
+**Provides**:
+- Cart items array with auto-persistence to localStorage
+- Calculated values (item count, total price)
+- CRUD operations (add, remove, update quantity, clear)
+- Type-safe with TypeScript interfaces
+
+**Usage**:
+```typescript
+import { useCart } from '../hooks/useCart';
+
+function ProductCard() {
+  const { cart, itemCount, totalPrice, addToCart } = useCart();
+  // Cart automatically syncs with localStorage
+}
+```
+
+### Critical Bug Fix
+
+**Issue**: Admin dashboard was using `sessionStorage.getItem('token')` but login stored tokens in `localStorage`
+
+**Impact**: All admin features failed with 401 Unauthorized errors
+
+**Solution**: Centralized all auth token access through AuthContext, eliminating direct storage access
+
+### State Storage Strategy
+
+| State Type | Storage Method | Scope | Persistence |
+|------------|----------------|-------|-------------|
+| Auth Token | Context + localStorage | Global | Cross-session |
+| User Info | Context (from JWT) | Global | From token |
+| Cart Items | Hook + localStorage | Component | Cross-session |
+| Form Data | Component useState | Local | Session only |
+
+**Documentation**: See `STATE_MANAGEMENT_IMPLEMENTATION.md` for detailed architecture and testing guide
+
 ## API Endpoints
 
 ### Account
@@ -256,6 +341,28 @@ lsof -i :8080
 docker info  # Check Docker status
 # Start Docker Desktop and retry
 ```
+
+**Registration/Login returns 405 Method Not Allowed:**
+
+This usually means the frontend can't reach the backend API.
+
+1. Check browser console for "Backend URL:" - it should show `http://localhost:8080`
+2. If it shows empty string or wrong URL:
+   ```bash
+   # Edit frontend/.env
+   echo "REACT_APP_HOST_IP_ADDRESS=http://localhost:8080" > frontend/.env
+
+   # Restart frontend
+   cd frontend
+   docker compose restart
+   ```
+3. Hard refresh browser (Ctrl+Shift+R) to reload environment config
+4. Check browser DevTools → Application → Local Storage for proper backend URL
+
+**Authentication state not persisting:**
+- Check browser DevTools → Application → Local Storage
+- Verify "token" key exists with JWT value
+- If using private/incognito mode, localStorage may be blocked
 
 ### Production Deployment
 

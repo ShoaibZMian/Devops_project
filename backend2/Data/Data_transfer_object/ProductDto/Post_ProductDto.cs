@@ -17,6 +17,7 @@ namespace backend2.Data.Data_transfer_object.ProductDto
         public int RebatePercent { get; set; }
         public string? UpsellProductId { get; set; }
 
+        public string? ImageUrl { get; set; }
         // public string? FileName { get; set; }
         // public string? ContentType { get; set; }
         // public string? Path { get; set; }

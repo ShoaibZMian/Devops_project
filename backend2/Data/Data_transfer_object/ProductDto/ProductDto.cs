@@ -17,13 +17,12 @@ namespace backend2.Data.Data_transfer_object.Dtos
         public int RebatePercent { get; set; }
         public string? UpsellProductId { get; set; }
 
-        [Required(ErrorMessage = "you must upload a file")]
+        public string? ImageUrl { get; set; }
+
         public byte[]? File { get; set; }
 
-        [Required(ErrorMessage = "you must upload a file name")]
         public string? FileName { get; set; }
 
-        [Required(ErrorMessage = "you must upload a content type")]
         [RegularExpression(@"^image\/(png|jpg|jpeg)$",
             ErrorMessage = "File must be of type png, jpg or jpeg")]
         public string? ContentType { get; set; }
