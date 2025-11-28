@@ -150,8 +150,8 @@ const CheckoutOverview = () => {
     return <LoadingSpinner />;
   }
 
-  const handleLoginForm = () => {
-    window.location.href = '/login';
+  const handleProceedToCheckout = () => {
+    navigate('/checkout/address');
   };
   
   return (
@@ -285,10 +285,10 @@ const CheckoutOverview = () => {
                   <p className="text-3xl font-bold text-primary">{total.toFixed(2)} DKK</p>
                 </div>
                 <button
-                  onClick={handleLoginForm}
+                  onClick={handleProceedToCheckout}
                   className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium text-lg"
                 >
-                  Proceed to Payment
+                  Proceed to Checkout
                 </button>
               </div>
             </div>
