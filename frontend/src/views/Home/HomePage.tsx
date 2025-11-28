@@ -34,6 +34,7 @@ const HomeView = () => {
   const [keywords, setKeywords] = useState('');
   const [sortBy, setSortBy] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
 
   useEffect(() => {
@@ -89,6 +90,17 @@ const HomeView = () => {
         console.log(error)
       })
   }
+
+  const getQuantity = (productId: string) => {
+    return quantities[productId] || 1;
+  };
+
+  const handleQuantityChange = (productId: string, newQuantity: number) => {
+    setQuantities({
+      ...quantities,
+      [productId]: newQuantity < 1 ? 1 : newQuantity
+    });
+  };
 
 
   return (
@@ -183,6 +195,26 @@ const HomeView = () => {
                   <p className="text-muted-foreground">Rebate Percent: {product.rebatePercent}%</p>
                   <p className="text-muted-foreground">Upsell Product ID: {product.upsellProductId}</p>
                 </div>
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <button
+                    onClick={() => handleQuantityChange(product.productId, getQuantity(product.productId) - 1)}
+                    className="h-8 w-8 border rounded-md bg-background text-foreground hover:bg-muted transition-colors"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={getQuantity(product.productId)}
+                    onChange={(e) => handleQuantityChange(product.productId, parseInt(e.target.value) || 1)}
+                    className="w-16 text-center border rounded-md px-2 py-1 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <button
+                    onClick={() => handleQuantityChange(product.productId, getQuantity(product.productId) + 1)}
+                    className="h-8 w-8 border rounded-md bg-background text-foreground hover:bg-muted transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
                 <button
                   className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
                   onClick={() => {
@@ -190,7 +222,7 @@ const HomeView = () => {
                       productId: product.productId,
                       name: product.name,
                       price: product.price,
-                      quantity: 1
+                      quantity: getQuantity(product.productId)
                     })
                   }}
                 >
