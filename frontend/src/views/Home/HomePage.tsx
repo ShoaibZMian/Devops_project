@@ -222,7 +222,8 @@ const HomeView = () => {
                       productId: product.productId,
                       name: product.name,
                       price: product.price,
-                      quantity: getQuantity(product.productId)
+                      quantity: getQuantity(product.productId),
+                      imageUrl: product.imageUrl
                     })
                   }}
                 >
