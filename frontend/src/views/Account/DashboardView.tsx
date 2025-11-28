@@ -260,8 +260,23 @@ const AdminDashboardView = () => {
                 window.location.reload();
             }, 1500);
         } catch (error: any) {
-            console.error('Error:', error);
-            const errorMessage = error.response?.data?.message || error.response?.data || "Failed to create product";
+            console.error('Error creating product:', error);
+            console.error('Error response:', error.response?.data);
+
+            let errorMessage = "Failed to create product";
+            if (error.response?.data) {
+                if (typeof error.response.data === 'string') {
+                    errorMessage = error.response.data;
+                } else if (error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response.data.title) {
+                    errorMessage = error.response.data.title;
+                } else if (error.response.data.errors) {
+                    errorMessage = JSON.stringify(error.response.data.errors);
+                } else {
+                    errorMessage = JSON.stringify(error.response.data);
+                }
+            }
             toast.error(`Error: ${errorMessage}`);
         }
     }
@@ -308,8 +323,23 @@ const AdminDashboardView = () => {
                 window.location.reload();
             }, 1500);
         } catch (error: any) {
-            console.error('Error:', error);
-            const errorMessage = error.response?.data?.message || error.response?.data || "Failed to update product";
+            console.error('Error updating product:', error);
+            console.error('Error response:', error.response?.data);
+
+            let errorMessage = "Failed to update product";
+            if (error.response?.data) {
+                if (typeof error.response.data === 'string') {
+                    errorMessage = error.response.data;
+                } else if (error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response.data.title) {
+                    errorMessage = error.response.data.title;
+                } else if (error.response.data.errors) {
+                    errorMessage = JSON.stringify(error.response.data.errors);
+                } else {
+                    errorMessage = JSON.stringify(error.response.data);
+                }
+            }
             toast.error(`Error: ${errorMessage}`);
         }
     }
@@ -343,8 +373,23 @@ const deleteProduct = async (id: string) => {
             window.location.reload();
         }, 1500);
     } catch (error: any) {
-        console.error('Error:', error);
-        const errorMessage = error.response?.data?.message || error.response?.data || "Failed to delete product";
+        console.error('Error deleting product:', error);
+        console.error('Error response:', error.response?.data);
+
+        let errorMessage = "Failed to delete product";
+        if (error.response?.data) {
+            if (typeof error.response.data === 'string') {
+                errorMessage = error.response.data;
+            } else if (error.response.data.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response.data.title) {
+                errorMessage = error.response.data.title;
+            } else if (error.response.data.errors) {
+                errorMessage = JSON.stringify(error.response.data.errors);
+            } else {
+                errorMessage = JSON.stringify(error.response.data);
+            }
+        }
         toast.error(`Error: ${errorMessage}`);
     }
 }
