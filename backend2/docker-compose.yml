@@ -6,8 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: backend2
-    ports:
-      - "8080:80"
+    network_mode: host
     environment:
       # Load environment variables from .env file
       - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
@@ -15,12 +14,10 @@ services:
       - JWT__Audience=${JWT__Audience}
       - JWT__OnlineStoreGroupe24=${JWT__OnlineStoreGroupe24}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
-      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_URLS=http://+:8080
     env_file:
       - .env
     restart: unless-stopped
-    networks:
-      - backend-network
 
 networks:
   backend-network:
