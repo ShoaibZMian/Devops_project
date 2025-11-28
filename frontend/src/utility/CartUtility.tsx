@@ -1,10 +1,15 @@
 import { toast } from 'react-toastify';
 
 interface CartItem {
+    id: string;
     productId: string;
     name: string;
     price: number;
     quantity: number;
+    imageUrl?: string;
+    rebateQuantity?: number;
+    rebatePercent?: number;
+    originalPrice?: number;
 }
 
 
@@ -33,9 +38,19 @@ export const handleQuantityChange: (productId: string, quantity: number) => void
 
 export const addToCart: (item: CartItem) => void = (item: CartItem) => {
     const cart = getCart();
-    const existingItem = cart.find((i) => i.productId === item.productId);
+    const existingItem = cart.find((i) => i.id === item.id || i.productId === item.productId);
     if (existingItem) {
         existingItem.quantity += item.quantity;
+
+        // Apply rebate if quantity meets threshold
+        if (existingItem.rebateQuantity && existingItem.rebatePercent && existingItem.originalPrice) {
+            if (existingItem.quantity >= existingItem.rebateQuantity) {
+                existingItem.price = existingItem.originalPrice * (1 - existingItem.rebatePercent / 100);
+            } else {
+                existingItem.price = existingItem.originalPrice;
+            }
+        }
+
         toast.success(`Updated ${item.name} quantity in cart!`, {
             position: "top-right",
             autoClose: 3000,

@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/checkout/Addressform.css";
+import axios from "../../httpCommon";
 import { validatePhoneNumber } from "./FormValidation";
 import { validateEmail } from "./FormValidation";
 import { validateVAT } from "./FormValidation";
 import { isValidZip } from "./FormValidation";
 import { Address } from "./FormInterface";
 import { Country } from "./FormInterface";
-import FullScreenWrapper from "../../components/container/FullScreenWrapper";
-import FullSizeSpaceContainer from "../../components/container/FullSizeSpaceContainer";
 
-// define the AddressForm  functional component
 const AddressForm: React.FC = () => {
   const [countries, setCountries] = useState<Country[]>([
     { alpha2Code: "DK", name: "Denmark", code: "+45" },
@@ -57,6 +54,55 @@ const AddressForm: React.FC = () => {
     }
   }, [delivery.country, delivery.phone, countries]);
 
+  // Fetch saved address when component mounts
+  useEffect(() => {
+    const fetchSavedAddress = async () => {
+      try {
+        const response = await axios.get('/api/UserAddress/GetAddress');
+        if (response.data) {
+          const savedAddress = response.data;
+
+          setDelivery({
+            country: savedAddress.deliveryCountry || "Denmark",
+            zip: savedAddress.deliveryZip || "",
+            city: savedAddress.deliveryCity || "",
+            address1: savedAddress.deliveryAddress1 || "",
+            address2: savedAddress.deliveryAddress2 || "",
+            name: savedAddress.deliveryName || "",
+            phone: savedAddress.deliveryPhone || "",
+            email: savedAddress.deliveryEmail || "",
+            company: savedAddress.deliveryCompany || "",
+            vat: savedAddress.deliveryVat || "",
+            countryCode: savedAddress.deliveryCountryCode || "",
+          });
+
+          if (savedAddress.isBillingDifferent) {
+            setIsBillingDifferent(true);
+            setBilling({
+              country: savedAddress.billingCountry || "Denmark",
+              zip: savedAddress.billingZip || "",
+              city: savedAddress.billingCity || "",
+              address1: savedAddress.billingAddress1 || "",
+              address2: savedAddress.billingAddress2 || "",
+              name: savedAddress.billingName || "",
+              phone: savedAddress.billingPhone || "",
+              email: savedAddress.billingEmail || "",
+              company: savedAddress.billingCompany || "",
+              vat: savedAddress.billingVat || "",
+              countryCode: savedAddress.billingCountryCode || "",
+            });
+          }
+        }
+      } catch (error: any) {
+        if (error.response?.status !== 404) {
+          console.error('Error fetching saved address:', error);
+        }
+      }
+    };
+
+    fetchSavedAddress();
+  }, []);
+
   const handleZipChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     type: string
@@ -94,7 +140,6 @@ const AddressForm: React.FC = () => {
               city: city,
             }));
           }
-        } else {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -114,6 +159,7 @@ const AddressForm: React.FC = () => {
       setBilling((prevState) => ({ ...prevState, phone }));
     }
   };
+
   const handleVatChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: string
@@ -127,7 +173,7 @@ const AddressForm: React.FC = () => {
     }
   };
 
-  const handlePayment = (e: React.FormEvent) => {
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!delivery.name) {
       setError("Name is required");
@@ -159,36 +205,30 @@ const AddressForm: React.FC = () => {
       setError("Invalid delivery email");
       return;
     }
-    // if  (delivery.country === 'Denmark' && !validateVAT(delivery.vat, delivery.country)) {
-    //     setError('Invalid delivery VAT');
-    //     return;
-    // }
+
     if (isBillingDifferent) {
       if (!billing.name) {
-        setError("Name is required");
+        setError("Billing name is required");
         return;
       }
       if (!billing.zip) {
-        setError("Zip is required");
+        setError("Billing zip is required");
         return;
       }
       if (!billing.address1) {
-        setError("Address1 is required");
+        setError("Billing address is required");
         return;
       }
       if (!billing.phone) {
-        setError("Phone is required");
+        setError("Billing phone is required");
         return;
       }
       if (!billing.email) {
-        setError("Email is required");
+        setError("Billing email is required");
         return;
       }
 
-      if (
-        isBillingDifferent &&
-        !validatePhoneNumber(billing.phone, billing.country)
-      ) {
+      if (!validatePhoneNumber(billing.phone, billing.country)) {
         setError("Invalid billing phone number");
         return;
       }
@@ -204,340 +244,387 @@ const AddressForm: React.FC = () => {
         return;
       }
     }
+
     sessionStorage.setItem("delivery", JSON.stringify(delivery));
     setError(null);
+
+    // Save address to backend
+    try {
+      await axios.post('/api/UserAddress/SaveAddress', {
+        deliveryCountry: delivery.country,
+        deliveryZip: delivery.zip,
+        deliveryCity: delivery.city,
+        deliveryAddress1: delivery.address1,
+        deliveryAddress2: delivery.address2,
+        deliveryName: delivery.name,
+        deliveryPhone: delivery.phone,
+        deliveryEmail: delivery.email,
+        deliveryCompany: delivery.company,
+        deliveryVat: delivery.vat,
+        deliveryCountryCode: delivery.countryCode,
+        isBillingDifferent: isBillingDifferent,
+        billingCountry: isBillingDifferent ? billing.country : null,
+        billingZip: isBillingDifferent ? billing.zip : null,
+        billingCity: isBillingDifferent ? billing.city : null,
+        billingAddress1: isBillingDifferent ? billing.address1 : null,
+        billingAddress2: isBillingDifferent ? billing.address2 : null,
+        billingName: isBillingDifferent ? billing.name : null,
+        billingPhone: isBillingDifferent ? billing.phone : null,
+        billingEmail: isBillingDifferent ? billing.email : null,
+        billingCompany: isBillingDifferent ? billing.company : null,
+        billingVat: isBillingDifferent ? billing.vat : null,
+        billingCountryCode: isBillingDifferent ? billing.countryCode : null,
+      });
+    } catch (error) {
+      console.error('Error saving address:', error);
+    }
+
     window.location.href = "/checkout/payment";
   };
 
   return (
-    <FullScreenWrapper>
-    <FullSizeSpaceContainer>
-    <div className="form-address-card">
-      <h4 className="form-address-card-header">Delivery Address</h4>
-      <form className="form-card">
-        <div>
-          <input
-            id="name"
-            name="name"
-            value={delivery.name}
-            className="form-input-two"
-            placeholder="Name"
-            onChange={(e) => {
-              setDelivery({ ...delivery, name: e.target.value });
-              setError(null);
-            }}
-          />
-          <select
-            className="form-input-two"
-            value={delivery.country}
-            onChange={(e) => {
-              setDelivery({ ...delivery, country: e.target.value });
-              setError(null);
-            }}
-          >
-            {countries.map((country) => (
-              <option
-                key={country.alpha2Code}
-                value={country.name}
-                disabled={
-                  country.name === "Sweden" || country.name === "Norway"
-                }
-              >
-                {country.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <input
-            type="number"
-            value={delivery.zip}
-            className="form-input-two"
-            placeholder="Zip Code"
-            onChange={(e) => handleZipChange(e, "delivery")}
-          />
-          <input
-            type="text"
-            value={delivery.city}
-            placeholder="City"
-            className="form-input-two"
-          />
-        </div>
-        <div>
-          <label htmlFor="address1">Address 1</label>
-          <input
-            id="address1"
-            name="address1"
-            value={delivery.address1}
-            className="form-input"
-            placeholder="street name , number , etc"
-            onChange={(e) => {
-              setDelivery({ ...delivery, address1: e.target.value });
-              setError(null);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="address2">Address 2</label>
-          <input
-            id="address2"
-            name="address2"
-            value={delivery.address2}
-            className="form-input"
-            placeholder="Apartment, suite, etc. (optional)"
-            onChange={(e) => {
-              setDelivery({ ...delivery, address2: e.target.value });
-              setError(null);
-            }}
-          />
-        </div>
+    <div className="min-h-screen bg-background py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <h1 className="text-3xl font-bold text-card-foreground mb-6">Delivery Information</h1>
 
-        <div>
-          <input
-            id="countryCode"
-            name="countryCode"
-            value={countryCode}
-            readOnly
-            className="form-input-code"
-          />
-
-          <input
-            id="phone"
-            name="phone"
-            value={delivery.phone}
-            className="form-input-phone"
-            placeholder="Phone"
-            onChange={(e) => handlePhoneChange(e, "delivery")}
-          />
-        </div>
-        <div>
-          <input
-            id="email"
-            name="email"
-            value={delivery.email}
-            className="form-input"
-            placeholder="Email"
-            onChange={(e) => {
-              setDelivery({ ...delivery, email: e.target.value });
-              setError(null);
-            }}
-          />
-        </div>
-        <div>
-          <input
-            id="company"
-            name="company"
-            value={delivery.company}
-            className="form-input-two"
-            placeholder="Company"
-            onChange={(e) => {
-              setDelivery({ ...delivery, company: e.target.value });
-              setError(null);
-            }}
-          />
-
-          <input
-            id="vat"
-            name="vat"
-            value={delivery.vat}
-            className="form-input-two"
-            placeholder="VAT"
-            onChange={(e) => {
-              handleVatChange(e, "delivery");
-              setError(null);
-            }}
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="isBillingDifferent"
-            style={{
-              marginRight: "10px",
-              marginTop: "20px",
-              fontSize: "18px",
-              fontWeight: "bold",
-              color: "Black",
-            }}
-          >
-            Is billing address different?
-          </label>
-
-          <input
-            id="isBillingDifferent"
-            name="isBillingDifferent"
-            type="checkbox"
-            checked={isBillingDifferent}
-            onChange={() => setIsBillingDifferent(!isBillingDifferent)}
-          />
-        </div>
-        <br></br>
-        {isBillingDifferent && (
-          <div>
-            <h4>Billing address </h4>
-            <br></br>
-            <div>
-              <input
-                id="name"
-                name="name"
-                value={billing.name}
-                className="form-input-two"
-                placeholder="Name"
-                onChange={(e) => {
-                  setBilling({ ...billing, name: e.target.value });
-                  setError(null);
-                }}
-              />
-              <select
-                id="country"
-                name="country"
-                value={billing.country}
-                className="form-input-two"
-                aria-placeholder="Country"
-                onChange={(e) => {
-                  setBilling({ ...billing, country: e.target.value });
-                  setError(null);
-                }}
-              >
-                {countries.map((country) => (
-                  <option key={country.alpha2Code} value={country.name}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <input
-                id="zip"
-                name="zip"
-                type="number"
-                value={billing.zip}
-                className="form-input-two"
-                placeholder="Zip Code"
-                onChange={(e) => handleZipChange(e, "billing")}
-              />
-              <input
-                id="city"
-                name="city"
-                value={billing.city}
-                className="form-input-two"
-                placeholder="City"
-                onChange={(e) => {
-                  setBilling({ ...billing, city: e.target.value });
-                  setError(null);
-                }}
-              />
-            </div>
-            <div>
-              <label htmlFor="address1">Address 1</label>
-              <input
-                id="address1"
-                name="address1"
-                value={billing.address1}
-                className="form-input"
-                placeholder="street name , number , etc"
-                onChange={(e) => {
-                  setBilling({ ...billing, address1: e.target.value });
-                  setError(null);
-                }}
-              />
-            </div>
-            <div>
-              <label htmlFor="address2">Address 2</label>
-              <input
-                id="address2"
-                name="address2"
-                value={billing.address2}
-                className="form-input"
-                placeholder="Apartment, suite, etc. (optional)"
-                onChange={(e) => {
-                  setBilling({ ...billing, address2: e.target.value });
-                  setError(null);
-                }}
-              />
-            </div>
-
-            <div>
-              <input
-                id="countryCode"
-                name="countryCode"
-                value={countryCode}
-                readOnly
-                className="form-input-code"
-                placeholder="Phone"
-              />
-              <input
-                id="phone"
-                name="phone"
-                value={billing.phone}
-                className="form-input-phone"
-                placeholder="Phone"
-                onChange={(e) => handlePhoneChange(e, "billing")}
-              />
-            </div>
-            <div>
-              <input
-                id="email"
-                name="email"
-                value={billing.email}
-                className="form-input"
-                placeholder="Email"
-                onChange={(e) => {
-                  setBilling({ ...billing, email: e.target.value });
-                  setError(null);
-                }}
-              />
-            </div>
-            <div>
-              <input
-                id="company"
-                name="company"
-                value={billing.company}
-                className="form-input-two"
-                placeholder="Company"
-                onChange={(e) => {
-                  setBilling({ ...billing, company: e.target.value });
-                  setError(null);
-                }}
-              />
-
-              <input
-                id="vat"
-                name="vat"
-                value={billing.vat}
-                className="form-input-two"
-                placeholder="VAT"
-                onChange={(e) => handleVatChange(e, "billing")}
-              />
-              {error && error.includes("vat") && (
-                <p style={{ color: "red" }}>{error}</p>
-              )}
-            </div>
-          </div>
-        )}
-      </form>
-      <div className="">
         {error && (
-          <div>
-            <p style={{ color: "red" }}>{error}</p>
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md text-red-800">
+            {error}
           </div>
         )}
-        <button
-          className="payment-button"
-          type="submit"
-          onClick={handlePayment}
-        >
-          Continue to payment
-        </button>
+
+        <form onSubmit={handlePayment}>
+          {/* Delivery Address Card */}
+          <div className="bg-card border rounded-xl shadow-sm p-6 mb-6">
+            <h2 className="text-2xl font-semibold text-card-foreground mb-4">Delivery Address</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Name *</label>
+                <input
+                  type="text"
+                  value={delivery.name}
+                  onChange={(e) => {
+                    setDelivery({ ...delivery, name: e.target.value });
+                    setError(null);
+                  }}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Full Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Country *</label>
+                <select
+                  value={delivery.country}
+                  onChange={(e) => {
+                    setDelivery({ ...delivery, country: e.target.value });
+                    setError(null);
+                  }}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {countries.map((country) => (
+                    <option
+                      key={country.alpha2Code}
+                      value={country.name}
+                      disabled={country.name === "Sweden" || country.name === "Norway"}
+                    >
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Zip Code *</label>
+                <input
+                  type="number"
+                  value={delivery.zip}
+                  onChange={(e) => handleZipChange(e, "delivery")}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="1234"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">City *</label>
+                <input
+                  type="text"
+                  value={delivery.city}
+                  readOnly
+                  className="w-full px-3 py-2 border rounded-md bg-muted text-foreground"
+                  placeholder="Auto-filled from zip"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Address *</label>
+                <input
+                  type="text"
+                  value={delivery.address1}
+                  onChange={(e) => {
+                    setDelivery({ ...delivery, address1: e.target.value });
+                    setError(null);
+                  }}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Street name, number, etc."
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Address 2 (Optional)</label>
+                <input
+                  type="text"
+                  value={delivery.address2}
+                  onChange={(e) => {
+                    setDelivery({ ...delivery, address2: e.target.value });
+                    setError(null);
+                  }}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Apartment, suite, etc."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Phone *</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={countryCode}
+                    readOnly
+                    className="w-20 px-3 py-2 border rounded-md bg-muted text-foreground"
+                  />
+                  <input
+                    type="text"
+                    value={delivery.phone}
+                    onChange={(e) => handlePhoneChange(e, "delivery")}
+                    className="flex-1 px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="12345678"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={delivery.email}
+                  onChange={(e) => {
+                    setDelivery({ ...delivery, email: e.target.value });
+                    setError(null);
+                  }}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Company (Optional)</label>
+                <input
+                  type="text"
+                  value={delivery.company}
+                  onChange={(e) => {
+                    setDelivery({ ...delivery, company: e.target.value });
+                    setError(null);
+                  }}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Company Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">VAT (Optional)</label>
+                <input
+                  type="text"
+                  value={delivery.vat}
+                  onChange={(e) => {
+                    handleVatChange(e, "delivery");
+                    setError(null);
+                  }}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="DK12345678"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isBillingDifferent}
+                  onChange={() => setIsBillingDifferent(!isBillingDifferent)}
+                  className="w-4 h-4 text-primary bg-background border-gray-300 rounded focus:ring-2 focus:ring-ring"
+                />
+                <span className="text-sm text-foreground font-medium">Billing address is different from delivery address</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Billing Address Card (if different) */}
+          {isBillingDifferent && (
+            <div className="bg-card border rounded-xl shadow-sm p-6 mb-6">
+              <h2 className="text-2xl font-semibold text-card-foreground mb-4">Billing Address</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Name *</label>
+                  <input
+                    type="text"
+                    value={billing.name}
+                    onChange={(e) => {
+                      setBilling({ ...billing, name: e.target.value });
+                      setError(null);
+                    }}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="Full Name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Country *</label>
+                  <select
+                    value={billing.country}
+                    onChange={(e) => {
+                      setBilling({ ...billing, country: e.target.value });
+                      setError(null);
+                    }}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    {countries.map((country) => (
+                      <option key={country.alpha2Code} value={country.name}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Zip Code *</label>
+                  <input
+                    type="number"
+                    value={billing.zip}
+                    onChange={(e) => handleZipChange(e, "billing")}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="1234"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">City *</label>
+                  <input
+                    type="text"
+                    value={billing.city}
+                    onChange={(e) => {
+                      setBilling({ ...billing, city: e.target.value });
+                      setError(null);
+                    }}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="City"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Address *</label>
+                  <input
+                    type="text"
+                    value={billing.address1}
+                    onChange={(e) => {
+                      setBilling({ ...billing, address1: e.target.value });
+                      setError(null);
+                    }}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="Street name, number, etc."
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Address 2 (Optional)</label>
+                  <input
+                    type="text"
+                    value={billing.address2}
+                    onChange={(e) => {
+                      setBilling({ ...billing, address2: e.target.value });
+                      setError(null);
+                    }}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="Apartment, suite, etc."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Phone *</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={countryCode}
+                      readOnly
+                      className="w-20 px-3 py-2 border rounded-md bg-muted text-foreground"
+                    />
+                    <input
+                      type="text"
+                      value={billing.phone}
+                      onChange={(e) => handlePhoneChange(e, "billing")}
+                      className="flex-1 px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      placeholder="12345678"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Email *</label>
+                  <input
+                    type="email"
+                    value={billing.email}
+                    onChange={(e) => {
+                      setBilling({ ...billing, email: e.target.value });
+                      setError(null);
+                    }}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="your@email.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Company (Optional)</label>
+                  <input
+                    type="text"
+                    value={billing.company}
+                    onChange={(e) => {
+                      setBilling({ ...billing, company: e.target.value });
+                      setError(null);
+                    }}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="Company Name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">VAT (Optional)</label>
+                  <input
+                    type="text"
+                    value={billing.vat}
+                    onChange={(e) => handleVatChange(e, "billing")}
+                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="DK12345678"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="px-8 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium text-lg"
+            >
+              Continue to Payment
+            </button>
+          </div>
+        </form>
       </div>
-        </div>
-      
-   
-      </FullSizeSpaceContainer >
-    </FullScreenWrapper>
-      );
-      };
-
-
-
+    </div>
+  );
+};
 
 export default AddressForm;

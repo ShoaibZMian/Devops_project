@@ -36,12 +36,6 @@ const Navbar = () => {
             Home
           </a>
           <a
-            href="/products"
-            className="text-foreground hover:text-primary transition-colors px-3 py-2 text-sm font-medium"
-          >
-            Products
-          </a>
-          <a
             href="/about"
             className="text-foreground hover:text-primary transition-colors px-3 py-2 text-sm font-medium"
           >

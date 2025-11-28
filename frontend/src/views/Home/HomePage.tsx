@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "../../httpCommon";
 import { addToCart } from "../../utility/CartUtility";
+import { toast } from 'react-toastify';
 
 document.title = "Home";
 
@@ -34,6 +35,7 @@ const HomeView = () => {
   const [keywords, setKeywords] = useState('');
   const [sortBy, setSortBy] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
 
   useEffect(() => {
@@ -89,6 +91,17 @@ const HomeView = () => {
         console.log(error)
       })
   }
+
+  const getQuantity = (productId: string) => {
+    return quantities[productId] || 1;
+  };
+
+  const handleQuantityChange = (productId: string, newQuantity: number) => {
+    setQuantities({
+      ...quantities,
+      [productId]: newQuantity < 1 ? 1 : newQuantity
+    });
+  };
 
 
   return (
@@ -178,20 +191,56 @@ const HomeView = () => {
                   {product.name}
                 </h4>
                 <div className="space-y-2 mb-4 text-sm flex-1">
-                  <p className="text-2xl font-bold text-primary">${product.price}</p>
-                  <p className="text-muted-foreground">Rebate Quantity: {product.rebateQuantity}</p>
-                  <p className="text-muted-foreground">Rebate Percent: {product.rebatePercent}%</p>
+                  <p className="text-2xl font-bold text-primary">{product.price} DKK</p>
+                  <p className="text-muted-foreground">Rebate Quantity: {product.rebateQuantity || (product as any).RebateQuantity || 0}</p>
+                  <p className="text-muted-foreground">Rebate Percent: {product.rebatePercent || (product as any).RebatePercent || 0}%</p>
                   <p className="text-muted-foreground">Upsell Product ID: {product.upsellProductId}</p>
+                </div>
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <button
+                    onClick={() => handleQuantityChange(product.productId, getQuantity(product.productId) - 1)}
+                    className="h-8 w-8 border rounded-md bg-background text-foreground hover:bg-muted transition-colors"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={getQuantity(product.productId)}
+                    onChange={(e) => handleQuantityChange(product.productId, parseInt(e.target.value) || 1)}
+                    className="w-16 text-center border rounded-md px-2 py-1 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <button
+                    onClick={() => handleQuantityChange(product.productId, getQuantity(product.productId) + 1)}
+                    className="h-8 w-8 border rounded-md bg-background text-foreground hover:bg-muted transition-colors"
+                  >
+                    +
+                  </button>
                 </div>
                 <button
                   className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
                   onClick={() => {
+                    // Handle both camelCase and PascalCase from backend
+                    const productData: any = product;
+                    const quantity = getQuantity(product.productId);
                     addToCart({
+                      id: product.productId,
                       productId: product.productId,
                       name: product.name,
                       price: product.price,
-                      quantity: 1
-                    })
+                      quantity: quantity,
+                      imageUrl: product.imageUrl,
+                      rebateQuantity: product.rebateQuantity || productData.RebateQuantity || 0,
+                      rebatePercent: product.rebatePercent || productData.RebatePercent || 0,
+                      originalPrice: product.price
+                    });
+                    toast.success(`${quantity}x ${product.name} added to cart!`, {
+                      position: "top-right",
+                      autoClose: 3000,
+                      hideProgressBar: false,
+                      closeOnClick: true,
+                      pauseOnHover: true,
+                      draggable: true,
+                    });
                   }}
                 >
                   Add to Cart
