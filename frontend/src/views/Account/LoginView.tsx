@@ -3,7 +3,7 @@ import axios from '../../httpCommon';
 import "../../styles/account/Login.css";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { isAdmin } from '../../utils/auth';
+import { useAuth } from '../../contexts/AuthContext';
 
 const LoginView = () => {
     const [formValues, setFormValues] = useState({
@@ -17,6 +17,7 @@ const LoginView = () => {
     });
 
     const navigate = useNavigate();
+    const { login, isAdmin } = useAuth();
 
     useEffect(() => {
         // Validate username and password
@@ -50,13 +51,13 @@ const LoginView = () => {
             const response = await axios.post('/api/Account/login', userData);
             console.log(response);
 
-            // Store token in localStorage
-            localStorage.setItem('token', response.data.token);
+            // Update auth context (which also stores in localStorage)
+            login(response.data.token);
 
             toast.success('Login successful!');
 
             // Navigate based on user role from JWT token
-            if (isAdmin()) {
+            if (isAdmin) {
                 navigate('/dashboard');
             } else {
                 navigate("/");

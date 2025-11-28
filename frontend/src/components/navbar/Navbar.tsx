@@ -1,12 +1,11 @@
 import NavbarLogo from "./NavbarLogo";
 import "../../styles/navbar/Navbar.css";
 import { useNavigate } from "react-router-dom";
-import { isAdmin, isAuthenticated, logout } from "../../utils/auth";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const authenticated = isAuthenticated();
-  const admin = isAdmin();
+  const { isAuthenticated: authenticated, isAdmin: admin, logout } = useAuth();
 
   const navigateToCheckout = () => {
     navigate("/checkout");

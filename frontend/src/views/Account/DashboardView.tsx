@@ -2,6 +2,7 @@
 import axios from '../../httpCommon';
 import "../../styles/account/DashboardView.css";
 import { toast } from 'react-toastify';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Category {
     categoryId: string;
@@ -28,6 +29,9 @@ interface Product {
 }
 
 const AdminDashboardView = () => {
+    // Get auth state from context
+    const { token } = useAuth();
+
     const [userCount, setUserCount] = useState(0);
     const [productCount, setProductCount] = useState(0);
 
@@ -92,8 +96,6 @@ const AdminDashboardView = () => {
     , []);
 
     const getCategoryById = async (id: string) => {
-        let token = sessionStorage.getItem('token');
-        console.log('Token:', token);
         if (id && token) {
             try {
                 axios.get(`/api/Categories/GetCategory/${id}`, {
@@ -114,8 +116,6 @@ const AdminDashboardView = () => {
     }
     
     const deleteCategory = async (id: string) => {
-        let token = sessionStorage.getItem('token');
-        console.log('Token:', token);
         if (id && token) {
             try {
                 axios.delete(`/api/Categories/DeleteCategory/${id}`, {
@@ -137,8 +137,6 @@ const AdminDashboardView = () => {
     }
     
     const createCategory = async () => {
-        let token = sessionStorage.getItem('token');
-        console.log('Token:', token);
         if (token) {
             try {
                 axios.post('api/Categories/CreateCategory', {
@@ -164,8 +162,6 @@ const AdminDashboardView = () => {
     
     
     const createSubCategory = async () => {
-        let token = sessionStorage.getItem('token');
-        console.log('Token:', token);
         if (token) {
             try {
                 axios.post('api/SubCategories/CreateSubCategory', {
@@ -192,8 +188,6 @@ const AdminDashboardView = () => {
     
     
     const getProduct = async (id: string) => {
-        let token = sessionStorage.getItem('token');
-        console.log('Token:', token);
         if (id && token) {
             try {
                 axios.get(`/api/Products/GetProduct/${id}`, {
@@ -218,9 +212,6 @@ const AdminDashboardView = () => {
     }
 
     const createProduct = async () => {
-        console.log('Product:', Name, Price, currency, rebateQuantity, rebatePercent, upsellProduct, subcategoryId, categoryId);
-        let token = sessionStorage.getItem('token');
-        console.log('Token:', token);
         if (token) {
             try {
                 axios.post('api/Products/CreateProduct', {
@@ -256,8 +247,6 @@ const AdminDashboardView = () => {
     }
 
     const updateProduct = async (id: string) => {
-        let token = sessionStorage.getItem('token');
-        console.log('Token:', token);
         if (id && token) {
             try {
                 axios.put(`/api/Products/UpdateProduct/${id}`, {
@@ -294,8 +283,6 @@ const AdminDashboardView = () => {
     }
 
 const deleteProduct = async (id: string) => {
-    let token = sessionStorage.getItem('token');
-    console.log('Token:', token);
     if (id && token) {
         try {
             axios.delete(`/api/Products/DeleteProduct/${id}`, {
@@ -317,8 +304,6 @@ const deleteProduct = async (id: string) => {
 }
 
     const getUser = async (id: string) => {
-        let token = sessionStorage.getItem('token');
-        console.log('Token:', token);
         if (id && token) {
             try {
                 axios.get(`/api/Admin/getUser/${id}`, {
