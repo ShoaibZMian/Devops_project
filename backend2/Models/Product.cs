@@ -5,6 +5,7 @@ namespace backend2.Models;
 
 public class Product
 {
+    [Key]
     public string? ProductId { get; set; }
     public string? Name { get; set; }
 
