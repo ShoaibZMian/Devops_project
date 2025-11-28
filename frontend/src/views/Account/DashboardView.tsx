@@ -230,13 +230,14 @@ const AdminDashboardView = () => {
         try {
             const response = await axios.post('api/Products/CreateProduct', {
                 Name: Name,
-                Price: Price,
-                RebateQuantity: rebateQuantity,
-                RebatePercent: rebatePercent,
-                UpsellProductId: upsellProduct,
-                ImageUrl: imageUrl,
-                SubcategoryId: subcategoryId,
-                CategoryId: categoryId,
+                Price: parseFloat(Price) || 0,
+                Currency: currency || "DKK",
+                RebateQuantity: parseInt(rebateQuantity) || 0,
+                RebatePercent: parseInt(rebatePercent) || 0,
+                UpsellProductId: upsellProduct || null,
+                ImageUrl: imageUrl || null,
+                SubcategoryId: parseInt(subcategoryId) || 0,
+                CategoryId: parseInt(categoryId) || 0,
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
