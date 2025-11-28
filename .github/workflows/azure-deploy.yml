@@ -217,6 +217,23 @@ jobs:
               --name ${{ env.FRONTEND_CONTAINER }} \
               --query instanceView.state -o tsv
 
+      - name: Verify API Backend Health
+        run: |
+          echo "Waiting for backend to be ready..."
+          sleep 30
+
+          echo "Testing basic health endpoint..."
+          curl -f http://${{ steps.backend.outputs.fqdn }}/api/Health || exit 1
+
+          echo "Testing database health endpoint..."
+          curl -f http://${{ steps.backend.outputs.fqdn }}/api/Health/db || exit 1
+
+          echo "Testing ping endpoint..."
+          curl -f http://${{ steps.backend.outputs.fqdn }}/api/Health/ping || exit 1
+
+          echo "All health checks passed!"
+
+
       - name: Azure Logout
         if: always()
         run: az logout
