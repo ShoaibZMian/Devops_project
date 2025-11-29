@@ -61,6 +61,22 @@ jobs:
         curl -f http://localhost:3000 || exit 1
         echo "✓ All services are ready!"
 
+    - name: Debug Backend API
+      run: |
+        echo "Testing backend API endpoints..."
+        echo "Health check:"
+        curl -s http://localhost:8080/api/Health/ping
+        echo ""
+        echo "Database health check:"
+        curl -s http://localhost:8080/api/Health/db
+        echo ""
+        echo "Get products:"
+        curl -s http://localhost:8080/api/Products/GetProducts | head -c 500
+        echo ""
+
+        echo "Backend logs:"
+        docker logs backend2 --tail 50
+
     - name: Run Playwright Tests
       run: npx playwright test cart.spec.ts --project=chromium
 
