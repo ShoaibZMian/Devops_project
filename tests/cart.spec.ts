@@ -3,7 +3,18 @@ import { test, expect } from '@playwright/test';
 test.describe('Shopping Cart Tests', () => {
 
   test('Add one product to cart', async ({ page }) => {
+    // Listen for console errors
+    page.on('console', msg => console.log('Browser console:', msg.text()));
+
+    // Listen for failed requests
+    page.on('requestfailed', request => {
+      console.log('Failed request:', request.url(), request.failure()?.errorText);
+    });
+
     await page.goto('/');
+
+    // Wait a bit for API call
+    await page.waitForTimeout(3000);
 
     // Wait for products to load
     await page.waitForSelector('button:has-text("Add to Cart")', { timeout: 10000 });
