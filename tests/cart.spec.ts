@@ -78,13 +78,16 @@ test.describe('Shopping Cart Tests', () => {
     // Wait for products to load
     await page.waitForSelector('button:has-text("Add to Cart")', { timeout: 10000 });
 
+    // Find the first product card and its controls
+    const firstProductCard = page.locator('button:has-text("Add to Cart")').first().locator('..');
+
     // Increase quantity for first product
-    const incrementBtn = page.locator('button:has-text("+")').first();
+    const incrementBtn = firstProductCard.locator('button:has-text("+")').first();
     await incrementBtn.click();
     await incrementBtn.click(); // Click twice to set quantity to 3
 
-    // Verify quantity is 3
-    const quantityInput = page.locator('input[type="number"]').first();
+    // Verify quantity is 3 - find the input within the product card area, not the filter input
+    const quantityInput = firstProductCard.locator('input[type="number"]').first();
     await expect(quantityInput).toHaveValue('3');
 
     // Add to cart
