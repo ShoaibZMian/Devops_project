@@ -55,26 +55,41 @@ jobs:
         run: |
           cd backend2
           docker compose up -d
-          echo "Waiting for backend to be ready..."
-          sleep 20
-          echo "Checking backend logs..."
-          docker compose logs backend2
 
       - name: Start Frontend Service
         run: |
           cd frontend
           docker compose up -d
-          echo "Waiting for frontend to be ready..."
-          sleep 10
 
-      - name: Verify Services are Running
+      - name: Wait for Services to be Ready
         run: |
+          echo "Waiting for backend to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:8080/api/Health/ping 2>/dev/null; then
+              echo "✓ Backend is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Backend not ready yet, waiting..."
+            sleep 2
+          done
+
+          echo "Waiting for frontend to be ready..."
+          for i in {1..20}; do
+            if curl -f http://localhost:3000 2>/dev/null; then
+              echo "✓ Frontend is ready!"
+              break
+            fi
+            echo "Attempt $i/20: Frontend not ready yet, waiting..."
+            sleep 2
+          done
+
+          echo "Checking services status..."
           docker ps
-          echo "Testing backend health..."
+
+          echo "Final health check..."
           curl -f http://localhost:8080/api/Health/ping || exit 1
-          echo "Testing frontend..."
           curl -f http://localhost:3000 || exit 1
-          echo "All services are ready!"
+          echo "✓ All services are ready!"
 
       - name: Run Playwright Tests
         run: npx playwright test cart.spec.ts --project=chromium
