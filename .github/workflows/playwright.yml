@@ -26,21 +26,10 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps chromium
 
-    - name: Setup Backend Test Environment
+    - name: Start Test Services with Database
       run: |
-        cd backend2
-        cp .env.test .env
-        cat .env
-
-    - name: Start Backend Service
-      run: |
-        cd backend2
-        docker compose up -d
-
-    - name: Start Frontend Service
-      run: |
-        cd frontend
-        docker compose up -d
+        docker compose -f .github/workflows/docker-compose.test.yml up -d
+        echo "Services starting..."
 
     - name: Wait for Services to be Ready
       run: |
@@ -94,5 +83,4 @@ jobs:
     - name: Stop Services
       if: always()
       run: |
-        cd backend2 && docker compose down || true
-        cd ../frontend && docker compose down || true
+        docker compose -f .github/workflows/docker-compose.test.yml down -v || true
