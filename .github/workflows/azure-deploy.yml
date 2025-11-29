@@ -26,9 +26,70 @@ env:
   DNS_LABEL_SUFFIX: devops-project
 
 jobs:
+  test:
+    name: Run Tests Before Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Backend Service
+        run: |
+          cd backend2
+          docker compose up -d
+          echo "Waiting for backend to be ready..."
+          sleep 15
+
+      - name: Start Frontend Service
+        run: |
+          cd frontend
+          docker compose up -d
+          echo "Waiting for frontend to be ready..."
+          sleep 10
+
+      - name: Verify Services are Running
+        run: |
+          docker ps
+          echo "Testing backend health..."
+          curl -f http://localhost:8080/api/Health/ping || exit 1
+          echo "Testing frontend..."
+          curl -f http://localhost:3000 || exit 1
+          echo "All services are ready!"
+
+      - name: Run Playwright Tests
+        run: npx playwright test cart.spec.ts --project=chromium
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: pre-deploy-test-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Stop Services
+        if: always()
+        run: |
+          cd backend2 && docker compose down || true
+          cd ../frontend && docker compose down || true
+
   build-and-push:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
+    needs: test
 
     steps:
       - name: Checkout code
@@ -237,3 +298,42 @@ jobs:
       - name: Azure Logout
         if: always()
         run: az logout
+
+  production-smoke-test:
+    name: Production Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy-to-azure
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for Production Deployment
+        run: |
+          echo "Waiting for production deployment to stabilize..."
+          sleep 30
+
+      - name: Run Production Smoke Tests
+        env:
+          BASE_URL: http://frontend-devops-project.northeurope.azurecontainer.io
+        run: npx playwright test production-smoke.spec.ts --project=chromium
+
+      - name: Upload Smoke Test Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: production-smoke-test-report
+          path: playwright-report/
+          retention-days: 7
