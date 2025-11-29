@@ -46,12 +46,19 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Setup Backend Test Environment
+        run: |
+          cd backend2
+          cp .env.test .env
+
       - name: Start Backend Service
         run: |
           cd backend2
           docker compose up -d
           echo "Waiting for backend to be ready..."
-          sleep 15
+          sleep 20
+          echo "Checking backend logs..."
+          docker compose logs backend2
 
       - name: Start Frontend Service
         run: |
